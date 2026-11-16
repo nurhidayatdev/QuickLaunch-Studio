@@ -72,9 +72,9 @@ Jika didesain manual di Canva / Figma / CorelDraw:
 | **Anti Lemot (Mobile 90+)** | Format super responsif, hemat kuota dan cepat dibuka di smartphone. | 🚀 Rocket / Mobile |
 
 ### D. Mockup Visual (Center-Right)
-* Mockup iPhone/HP menampilkan landing page `quicklaunch-studio.vercel.app/p/seminar-ai-2026`.
+* Mockup iPhone/HP menampilkan landing page `quicklaunch-studio.vercel.app/p/sambal-cumi-juara`.
 * Kartu pop-up analitik transparan di samping HP:  
-  * `Total Pendaftar: 1.420+ Peserta`
+  * `Total Pesanan Masuk: 1.420+ Pcs`
   * `Google Sheets Auto-Sync: Aktif ✓`
 
 ### E. Penawaran & Paket Harga Real (Sesuai Landing Page)

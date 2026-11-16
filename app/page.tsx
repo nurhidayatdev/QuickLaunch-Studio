@@ -70,11 +70,11 @@ export default async function HomePage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/p/seminar-ai-2026"
+                href="/p/sambal-cumi-juara"
                 target="_blank"
                 className="flex min-h-[50px] w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white/90 backdrop-blur-sm px-7 py-3.5 text-sm font-bold text-slate-700 hover:bg-white hover:text-slate-900 hover:border-slate-400 transition-all shadow-sm"
               >
-                <span>Lihat Contoh Halaman Publik</span>
+                <span>Lihat Contoh Toko UMKM</span>
               </Link>
             </div>
 
