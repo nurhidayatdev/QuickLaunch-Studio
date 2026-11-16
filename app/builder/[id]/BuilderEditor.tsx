@@ -307,72 +307,73 @@ export default function BuilderEditor({
           }`}
         >
           {/* Sub-steps Navigation */}
-          <div className="flex items-center gap-1 overflow-x-auto rounded-xl bg-white p-1.5 border border-slate-200 shadow-sm text-xs font-semibold">
+          {/* Section Step Buttons */}
+          <div className="flex items-center gap-1.5 overflow-x-auto rounded-2xl bg-white p-1.5 border border-slate-200/80 shadow-xs text-xs font-bold">
             <button
               onClick={() => setFormSection(1)}
-              className={`flex min-h-[40px] items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+              className={`flex min-h-[40px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 formSection === 1
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <FileText className="h-3.5 w-3.5" />
-              1. Info Dasar
+              <span>1. Info Dasar</span>
             </button>
             <button
               onClick={() => setFormSection(2)}
-              className={`flex min-h-[40px] items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+              className={`flex min-h-[40px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 formSection === 2
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <Calendar className="h-3.5 w-3.5" />
-              2. Jadwal & Biaya
+              <span>2. Jadwal & Biaya</span>
             </button>
             <button
               onClick={() => setFormSection(3)}
-              className={`flex min-h-[40px] items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+              className={`flex min-h-[40px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 formSection === 3
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <ImageIcon className="h-3.5 w-3.5" />
-              3. Tampilan & Warna
+              <span>3. Desain & Template</span>
             </button>
             <button
               onClick={() => setFormSection(4)}
-              className={`flex min-h-[40px] items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+              className={`flex min-h-[40px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 formSection === 4
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <ListTodo className="h-3.5 w-3.5" />
-              4. Susun Form
+              <span>4. Susun Form</span>
             </button>
             <button
               onClick={() => setFormSection(5)}
-              className={`flex min-h-[40px] items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+              className={`flex min-h-[40px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 formSection === 5
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <FileSpreadsheet className="h-3.5 w-3.5" />
-              5. Google Sheets
+              <span>5. Google Sheets</span>
             </button>
             <button
               onClick={() => setFormSection(6)}
-              className={`flex min-h-[40px] items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+              className={`flex min-h-[40px] items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
                 formSection === 6
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <MessageCircle className="h-3.5 w-3.5" />
-              6. Kontak WA
+              <span>6. Kontak WA</span>
             </button>
           </div>
 
@@ -809,11 +810,16 @@ export default function BuilderEditor({
 
           {/* Preview Viewport */}
           {previewDevice === "mobile" ? (
-            <div className="w-full max-w-[390px] rounded-[40px] border-[10px] border-slate-900 bg-white shadow-2xl overflow-hidden min-h-[640px] max-h-[750px] flex flex-col relative ring-1 ring-slate-900/10">
-              {/* Phone Speaker & Camera Notch */}
-              <div className="w-full h-6 bg-slate-900 flex items-center justify-center">
-                <div className="h-4 w-28 bg-slate-800 rounded-full flex items-center justify-center">
-                  <div className="h-2 w-2 rounded-full bg-slate-700" />
+            <div className="w-full max-w-[395px] rounded-[44px] border-[10px] border-slate-900 bg-white shadow-2xl shadow-slate-900/20 overflow-hidden min-h-[660px] max-h-[760px] flex flex-col relative ring-1 ring-slate-800">
+              {/* Dynamic Island / Titanium Speaker notch */}
+              <div className="w-full h-7 bg-slate-900 flex items-center justify-between px-7 shrink-0">
+                <span className="text-[10px] font-semibold text-slate-400">9:41</span>
+                <div className="h-4 w-24 bg-black rounded-full flex items-center justify-center gap-1.5 px-2">
+                  <div className="h-2 w-2 rounded-full bg-slate-800" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-blue-900/60" />
+                </div>
+                <div className="flex items-center gap-1 text-[10px] text-slate-400 font-mono">
+                  <span>5G</span>
                 </div>
               </div>
 
@@ -827,22 +833,23 @@ export default function BuilderEditor({
                 />
               </div>
 
-              {/* Phone Home Bar */}
-              <div className="w-full h-4 bg-slate-900 flex items-center justify-center">
-                <div className="h-1 w-20 bg-slate-600 rounded-full" />
+              {/* Home indicator bar */}
+              <div className="w-full h-5 bg-white border-t border-slate-100 flex items-center justify-center shrink-0">
+                <div className="h-1 w-28 bg-slate-300 rounded-full" />
               </div>
             </div>
           ) : (
-            <div className="w-full rounded-2xl border border-slate-300 bg-white shadow-lg overflow-hidden max-h-[750px] overflow-y-auto">
-              <div className="border-b border-slate-200 bg-slate-50 px-4 py-2 flex items-center gap-2">
+            <div className="w-full rounded-2xl border border-slate-200/90 bg-white shadow-xl overflow-hidden max-h-[750px] overflow-y-auto">
+              <div className="border-b border-slate-200 bg-slate-100/80 px-4 py-2.5 flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                  <div className="h-3 w-3 rounded-full bg-rose-400/80 border border-rose-500/20" />
+                  <div className="h-3 w-3 rounded-full bg-amber-400/80 border border-amber-500/20" />
+                  <div className="h-3 w-3 rounded-full bg-emerald-400/80 border border-emerald-500/20" />
                 </div>
                 <div className="flex-1 text-center">
-                  <span className="text-[11px] text-slate-500 font-mono bg-white px-3 py-0.5 rounded-md border border-slate-200">
-                    quicklaunch.id/{formData.slug}
+                  <span className="text-[11px] text-slate-600 font-mono bg-white px-4 py-1 rounded-lg border border-slate-200/80 shadow-xs inline-flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    https://quicklaunch.id/p/{formData.slug || "slug-anda"}
                   </span>
                 </div>
               </div>
