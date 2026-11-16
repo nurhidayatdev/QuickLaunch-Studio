@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  passwordHash String
+  role         String         @default("user") // user, admin
+  package      String         @default("none") // none, single, pro, business
+  pageQuota    Int            @default(0) // Kuota pembuatan landing page
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  pages        Page[]
+  paymentOrders PaymentOrder[]
+}
+
+model PaymentOrder {
+  id              String    @id @default(cuid())
+  orderNumber     String    @unique // Misal: QL-2603-ABC
+  userId          String
+  packagePlan     String    // single, pro, business
+  packageName     String    // Paket Single, Paket Pro, Paket Bisnis
+  price           Int       // Nominal rupiah
+  quotaAdded      Int       // Jumlah penambahan kuota
+  status          String    @default("pending") // pending, approved, rejected
+  paymentMethod   String    // BCA, Mandiri, QRIS, Dana
+  accountHolder   String?   // Nama pemilik rekening pengirim
+  proofImageUrl   String?   // Base64 gambar bukti transfer
+  rejectionReason String?   // Alasan jika ditolak admin
+  verifiedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Page {
+  id           String   @id @default(cuid())
+  userId       String
+  category     String   @default("event") // event, produk
+  templateId   String   @default("modern-event")
+  title        String
+  description  String?
+  schedule     String?  // Jadwal tanggal / jam
+  location     String?  // Lokasi fisik / online
+  price        String?  // Info harga / tiket / gratis
+  bannerUrl    String?  // URL gambar / banner
+  waNumber     String?  // Kontak WhatsApp panitia / penjual
+  waMessageTemplate String? // Template draf pesan konfirmasi WA
+  accentColor  String   @default("#2563eb") // Hex warna aksen
+  status       String   @default("draft") // draft, published
+  slug         String   @unique
+  customDomain String?
+  googleSheetId String?
+  googleSheetsWebhookUrl String?
+  viewsCount   Int      @default(0) // Counter jumlah kunjungan
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fields       FormField[]
+  submissions  Submission[]
+}
+
+model FormField {
+  id        String   @id @default(cuid())
+  pageId    String
+  label     String
+  type      String   @default("text") // text, email, tel, select
+  required  Boolean  @default(true)
+  order     Int      @default(0)
+  options   String?  // comma-separated choices for select type
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id              String   @id @default(cuid())
+  pageId          String
+  data            String   // JSON string of submitted field values
+  statusSyncSheet String   @default("pending") // pending, synced, failed
+  createdAt       DateTime @default(now())
+
+  page            Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+model SystemSetting {
+  id            String   @id @default("default")
+  bankAccounts  String   // JSON string of BankAccount[]
+  adminWaNumber String   @default("081234567890")
+  updatedAt     DateTime @updatedAt
+}
