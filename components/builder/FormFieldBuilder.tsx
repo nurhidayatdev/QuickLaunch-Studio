@@ -16,6 +16,7 @@ import {
   ListFilter,
   Save,
   Loader2,
+  Upload,
 } from "lucide-react";
 
 export interface FormFieldItem {
@@ -32,6 +33,7 @@ const FIELD_TYPES = [
   { value: "tel", label: "Nomor WhatsApp", icon: Phone },
   { value: "email", label: "Email", icon: Mail },
   { value: "select", label: "Pilihan Dropdown", icon: ListFilter },
+  { value: "file", label: "Upload Bukti Bayar / Gambar", icon: Upload },
 ];
 
 export default function FormFieldBuilder({
@@ -248,9 +250,19 @@ export default function FormFieldBuilder({
                     type="text"
                     value={field.options || ""}
                     onChange={(e) => handleChange(idx, "options", e.target.value)}
-                    placeholder="Contoh: Tiket Reguler, Tiket VIP, Pelajar"
-                    className="w-full min-h-[36px] rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs text-slate-900 focus:border-blue-600 focus:outline-none"
+                    placeholder="Opsi 1, Opsi 2, Opsi 3"
+                    className="w-full min-h-[38px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none"
                   />
+                </div>
+              )}
+
+              {/* Info for File Upload */}
+              {field.type === "file" && (
+                <div className="mt-2.5 pt-2 border-t border-slate-200 flex items-center gap-2 text-[11px] text-blue-700 bg-blue-50/70 px-3 py-2 rounded-lg">
+                  <Upload className="h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    Peserta/pembeli dapat mengunggah file gambar (struk transfer, bukti bayar QRIS/rekening) yang otomatis terkompresi.
+                  </span>
                 </div>
               )}
             </div>

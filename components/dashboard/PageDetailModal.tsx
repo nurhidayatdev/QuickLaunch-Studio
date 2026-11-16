@@ -15,6 +15,7 @@ import {
   Tag,
   ShieldCheck,
   Clock,
+  Image,
 } from "lucide-react";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
 
@@ -49,6 +50,7 @@ export default function PageDetailModal({
 }: PageDetailModalProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWa, setCopiedWa] = useState(false);
+  const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
 
   if (!isOpen || !page) return null;
 
@@ -272,6 +274,14 @@ export default function PageDetailModal({
                       parsed["Pilihan Tiket / Kategori"] ||
                       "";
 
+                    // Check if there is an uploaded proof image in parsed data
+                    let proofImg: string | null = null;
+                    Object.entries(parsed).forEach(([k, v]) => {
+                      if (typeof v === "string" && v.startsWith("data:image/")) {
+                        proofImg = v;
+                      }
+                    });
+
                     return (
                       <div
                         key={sub.id}
@@ -288,11 +298,23 @@ export default function PageDetailModal({
 
                         <div className="col-span-4 truncate">
                           <span className="text-slate-700 block truncate">{contact}</span>
-                          {ticket && (
-                            <span className="text-[10px] text-blue-600 font-medium truncate block">
-                              {ticket}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            {ticket && (
+                              <span className="text-[10px] text-blue-600 font-medium truncate">
+                                {ticket}
+                              </span>
+                            )}
+                            {proofImg && (
+                              <button
+                                type="button"
+                                onClick={() => setActiveProofModal(proofImg)}
+                                className="inline-flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-md hover:bg-emerald-100 font-semibold shrink-0"
+                              >
+                                <Image className="h-3 w-3" />
+                                <span>Bukti Bayar</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         <div className="col-span-2">
@@ -334,6 +356,43 @@ export default function PageDetailModal({
           </button>
         </div>
       </div>
+
+      {/* Lightbox / Preview Bukti Pembayaran */}
+      {activeProofModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4">
+          <div className="relative max-w-lg w-full bg-slate-900 rounded-2xl overflow-hidden p-4 border border-slate-800 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Image className="h-4 w-4 text-emerald-400" />
+                Bukti Pembayaran Pendaftar
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveProofModal(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="py-4 flex justify-center">
+              <img
+                src={activeProofModal}
+                alt="Bukti Transfer"
+                className="max-h-[70vh] w-auto rounded-xl object-contain shadow-lg"
+              />
+            </div>
+            <div className="text-right">
+              <a
+                href={activeProofModal}
+                download="bukti-transfer.jpg"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
+              >
+                Unduh Gambar
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

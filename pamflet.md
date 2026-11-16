@@ -1,12 +1,12 @@
 # PROMPT PANDUAN DESIGN PAMFLET PROMOSI QUICKLAUNCH
-> **Format & Rasio**: 4:3 (Landscape / Horizontal Poster / Pitch Deck Cover / Feed Slide)  
+> **Format & Rasio**: 1080 x 1350
 > **Target Tool**: Stitch / Midjourney / Canva / Figma / DALL-E / Designer  
 > **Tema Desain**: Modern Enterprise SaaS, High Conversion, Tech-Forward, Clean Aesthetic  
 
 ---
 
 ## 1. Context & Meta Information
-- **Nama Produk**: QuickLaunch Studio (`quicklaunch.id`)
+- **Nama Produk**: QuickLaunch Studio (`quicklaunch-studio.vercel.app`)
 - **Tagline**: *"Bikin Landing Page Event & Produk UMKM Dalam 60 Detik Tanpa Coding!"*
 - **Target Audiens**: Event Organizer, Panitia Seminar/Webinar, Komunitas Kampus, Pelaku UMKM, Online Seller.
 - **Goal Pamflet**: Menarik perhatian audiens dalam 3 detik, menunjukkan kemudahan instan (60 detik), fitur unggulan (Direct WhatsApp & Google Sheets), dan transparansi harga terjangkau (Mulai Rp25.000 sekali bayar, tanpa langganan).
@@ -32,7 +32,7 @@ Layout & Structure (4:3 Horizontal Composition):
     * 🎨 3 Pilihan Template Desain Modern Siap Pakai
   - Pricing & Call to Action:
     * Price tag pill badge: "Mulai Rp25.000 / event • Sekali Bayar Selamanya • Tanpa Biaya Bulanan"
-    * Primary CTA Button: "Mulai Sekarang → quicklaunch.id"
+    * Primary CTA Button: "Mulai Sekarang → quicklaunch-studio.vercel.app."
 
 - Right Side (54% width):
   - A 3D isometric floating device showcase featuring:
@@ -72,7 +72,7 @@ Jika didesain manual di Canva / Figma / CorelDraw:
 | **Anti Lemot (Mobile 90+)** | Format super responsif, hemat kuota dan cepat dibuka di smartphone. | 🚀 Rocket / Mobile |
 
 ### D. Mockup Visual (Center-Right)
-* Mockup iPhone/HP menampilkan landing page `quicklaunch.id/p/seminar-ai-2026`.
+* Mockup iPhone/HP menampilkan landing page `quicklaunch-studio.vercel.app/p/seminar-ai-2026`.
 * Kartu pop-up analitik transparan di samping HP:  
   * `Total Pendaftar: 1.420+ Peserta`
   * `Google Sheets Auto-Sync: Aktif ✓`
@@ -80,12 +80,12 @@ Jika didesain manual di Canva / Figma / CorelDraw:
 ### E. Penawaran & Paket Harga Real (Sesuai Landing Page)
 * **Skema Bayar**: **Sekali Bayar Selamanya (Tanpa Biaya Langganan Bulanan)**
 * **Daftar Paket Resmi**:
-  1. **Paket Single Event**: **Rp 25.000** *(1 Landing Page Aktif, 3 Template, Form Kustom, Link WA)*
+  1. **Paket Single Event**: **Rp 25.000** *(1 Landing Page Aktif, 3 Template, Form Kustom, Link WA)
   2. **Paket Pro Komunitas (Paling Populer)**: **Rp 50.000** *(3 Landing Page Aktif, Auto-Sync Google Sheets, Duplikasi 1-Klik)*
   3. **Paket Bisnis & Agensi**: **Rp 99.000** *(10 Landing Page Aktif, Kapasitas Besar, WhatsApp Support Prioritas)*
-* **Metode Pembayaran**: Transfer Bank BCA, Mandiri, & QRIS (GoPay, OVO, Dana).
+
 * **Call to Action**:  
-  **Kunjungi Sekarang:** 👉 `quicklaunch.id`  
+  **Kunjungi Sekarang:** 👉 `quicklaunch-studio.vercel.app`  
   *Daftar & buat landing page pertama Anda hari ini!*
 
 ---

@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Loader2,
   ShoppingBag,
+  Upload,
+  FileCheck,
 } from "lucide-react";
 import { FormFieldItem } from "../builder/FormFieldBuilder";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
@@ -284,6 +286,65 @@ export default function CardCompactTemplate({
                               </option>
                             ))}
                         </select>
+                      ) : field.type === "file" ? (
+                        <div className="space-y-1.5">
+                          <label className="flex flex-col items-center justify-center w-full min-h-[90px] border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl cursor-pointer bg-slate-50 hover:bg-emerald-50/20 transition-all p-2.5">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              required={field.required && !value}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  const img = new Image();
+                                  img.onload = () => {
+                                    const canvas = document.createElement("canvas");
+                                    const MAX_WIDTH = 900;
+                                    const scaleSize = MAX_WIDTH / img.width;
+                                    const width = img.width > MAX_WIDTH ? MAX_WIDTH : img.width;
+                                    const height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
+                                    canvas.width = width;
+                                    canvas.height = height;
+                                    const ctx = canvas.getContext("2d");
+                                    if (ctx) {
+                                      ctx.drawImage(img, 0, 0, width, height);
+                                      const compressed = canvas.toDataURL("image/jpeg", 0.7);
+                                      handleInputChange(key, compressed);
+                                    }
+                                  };
+                                  img.src = event.target?.result as string;
+                                };
+                                reader.readAsDataURL(file);
+                              }}
+                              className="hidden"
+                            />
+                            {value ? (
+                              <div className="flex items-center gap-1.5 text-emerald-600 font-semibold text-[11px]">
+                                <FileCheck className="h-4 w-4" />
+                                <span>Bukti transfer terunggah ✓</span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center text-center">
+                                <Upload className="h-5 w-5 text-slate-400 mb-1" />
+                                <span className="text-[11px] font-semibold text-slate-700">
+                                  Unggah Bukti Bayar / Resi
+                                </span>
+                                <span className="text-[9px] text-slate-400">
+                                  Klik untuk pilih gambar
+                                </span>
+                              </div>
+                            )}
+                          </label>
+                          {value && (
+                            <img
+                              src={value}
+                              alt="Preview"
+                              className="h-14 w-auto rounded border border-slate-200 object-cover shadow-2xs"
+                            />
+                          )}
+                        </div>
                       ) : (
                         <input
                           type={field.type === "tel" ? "tel" : field.type === "email" ? "email" : "text"}
