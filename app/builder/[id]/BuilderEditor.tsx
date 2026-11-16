@@ -8,6 +8,7 @@ import FormFieldBuilder, { FormFieldItem } from "@/components/builder/FormFieldB
 import GoogleSheetsIntegration from "@/components/builder/GoogleSheetsIntegration";
 import PublishSuccessModal from "@/components/builder/PublishSuccessModal";
 import { DEFAULT_WA_TEMPLATE, fillWhatsAppTemplate } from "@/lib/whatsapp";
+import { useModal } from "@/components/ui/ModalProvider";
 import {
   ArrowLeft,
   Save,
@@ -48,6 +49,7 @@ export default function BuilderEditor({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showAlert, showConfirm } = useModal();
   const initialTab = searchParams.get("tab") === "preview" ? "preview" : "edit";
 
   const [activeTab, setActiveTab] = useState<"edit" | "preview">(initialTab);
@@ -81,11 +83,14 @@ export default function BuilderEditor({
     const isCurrentlyPublished = pageStatus === "published";
     const targetStatus = isCurrentlyPublished ? "draft" : "published";
 
-    if (
-      isCurrentlyPublished &&
-      !confirm("Tarik kembali halaman ke status Draf? Halaman tidak akan bisa dibuka lagi oleh publik.")
-    ) {
-      return;
+    if (isCurrentlyPublished) {
+      const confirmed = await showConfirm(
+        "Tarik kembali halaman ke status Draf? Halaman tidak akan bisa dibuka lagi oleh publik.",
+        "Konfirmasi Draf",
+        "Tarik ke Draf",
+        "Batal"
+      );
+      if (!confirmed) return;
     }
 
     setPublishing(true);
@@ -112,11 +117,11 @@ export default function BuilderEditor({
       if (targetStatus === "published") {
         setShowSuccessModal(true);
       } else {
-        alert("Halaman berhasil ditarik kembali ke draf.");
+        await showAlert("Halaman berhasil ditarik kembali ke draf.", "info", "Status Diperbarui");
       }
       router.refresh();
     } catch (e: any) {
-      alert(e.message || "Terjadi kesalahan saat mempublikasikan");
+      await showAlert(e.message || "Terjadi kesalahan saat mempublikasikan", "error");
     } finally {
       setPublishing(false);
     }
@@ -140,7 +145,9 @@ export default function BuilderEditor({
       setTimeout(() => setSaveStatus(""), 3000);
       router.refresh();
     } catch (e: any) {
-      alert(e.message || "Gagal menyimpan perubahan");
+      if (!silent) {
+        await showAlert(e.message || "Gagal menyimpan perubahan", "error");
+      }
     } finally {
       if (!silent) setSaving(false);
     }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import PageDetailModal from "@/components/dashboard/PageDetailModal";
 import PackageCheckoutModal from "@/components/pricing/PackageCheckoutModal";
 import { ADMIN_CONTACT } from "@/lib/payment-config";
+import { useModal } from "@/components/ui/ModalProvider";
 import {
   Calendar,
   Users,
@@ -57,6 +58,7 @@ export default function DashboardClient({
   initialPendingOrder?: any;
 }) {
   const router = useRouter();
+  const { showAlert, showConfirm } = useModal();
   const [pages, setPages] = useState<PageItem[]>(initialPages);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
@@ -81,9 +83,13 @@ export default function DashboardClient({
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus halaman "${title}"?`)) {
-      return;
-    }
+    const confirmed = await showConfirm(
+      `Apakah Anda yakin ingin menghapus halaman "${title}"?\nSemua formulir dan data peserta pada halaman ini akan ikut terhapus secara permanen.`,
+      "Hapus Halaman",
+      "Ya, Hapus",
+      "Batal"
+    );
+    if (!confirmed) return;
 
     setDeletingId(id);
     try {
@@ -97,8 +103,9 @@ export default function DashboardClient({
 
       setPages((prev) => prev.filter((p) => p.id !== id));
       router.refresh();
+      await showAlert(`Halaman "${title}" telah berhasil dihapus.`, "success");
     } catch (e: any) {
-      alert(e.message || "Terjadi kesalahan saat menghapus");
+      await showAlert(e.message || "Terjadi kesalahan saat menghapus", "error");
     } finally {
       setDeletingId(null);
     }
@@ -106,7 +113,11 @@ export default function DashboardClient({
 
   const handleDuplicate = async (id: string, title: string) => {
     if (isQuotaFull) {
-      alert("Kuota pembuatan halaman Anda telah habis. Silakan upgrade paket terlebih dahulu.");
+      await showAlert(
+        "Kuota pembuatan halaman Anda telah habis. Silakan pilih paket di dashboard untuk menambah kuota.",
+        "warning",
+        "Kuota Penuh"
+      );
       setIsCheckoutOpen(true);
       return;
     }
@@ -124,9 +135,13 @@ export default function DashboardClient({
 
       setPages((prev) => [data.page, ...prev]);
       router.refresh();
-      alert(`Halaman "${title}" berhasil diduplikasi menjadi "${data.page.title}".`);
+      await showAlert(
+        `Halaman "${title}" berhasil diduplikasi menjadi "${data.page.title}".`,
+        "success",
+        "Duplikasi Berhasil"
+      );
     } catch (e: any) {
-      alert(e.message || "Gagal menduplikasi");
+      await showAlert(e.message || "Gagal menduplikasi", "error");
     } finally {
       setDuplicatingId(null);
     }

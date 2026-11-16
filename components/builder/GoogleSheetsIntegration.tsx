@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useModal } from "@/components/ui/ModalProvider";
 import {
   FileSpreadsheet,
   CheckCircle2,
@@ -52,6 +53,7 @@ export default function GoogleSheetsIntegration({
   initialWebhookUrl,
   onUrlChange,
 }: GoogleSheetsIntegrationProps) {
+  const { showAlert } = useModal();
   const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl || "");
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{
@@ -75,7 +77,11 @@ export default function GoogleSheetsIntegration({
 
   const handleTestConnection = async () => {
     if (!webhookUrl.trim()) {
-      alert("Masukkan URL Web App Google Apps Script terlebih dahulu.");
+      await showAlert(
+        "Masukkan URL Web App Google Apps Script terlebih dahulu sebelum menguji koneksi.",
+        "warning",
+        "URL Belum Diisi"
+      );
       return;
     }
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import StepIndicator from "@/components/builder/StepIndicator";
+import { useModal } from "@/components/ui/ModalProvider";
 import {
   CalendarDays,
   ShoppingBag,
@@ -22,6 +23,7 @@ const STEPS = [
 
 export default function NewBuilderPage() {
   const router = useRouter();
+  const { showAlert } = useModal();
   const [step, setStep] = useState<number>(1);
   const [category, setCategory] = useState<"event" | "produk">("event");
   const [templateId, setTemplateId] = useState<string>("modern-event");
@@ -30,14 +32,18 @@ export default function NewBuilderPage() {
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((data) => {
+      .then(async (data) => {
         if (data.user?.role === "admin") {
-          alert("Akun admin difokuskan untuk operasional sistem dan verifikasi pembayaran.");
+          await showAlert(
+            "Akun admin difokuskan untuk operasional sistem dan verifikasi pembayaran.",
+            "info",
+            "Akses Admin"
+          );
           router.replace("/admin/payments");
         }
       })
       .catch(() => {});
-  }, [router]);
+  }, [router, showAlert]);
 
   const handleCreate = async () => {
     setLoading(true);
@@ -69,7 +75,11 @@ export default function NewBuilderPage() {
       const data = await res.json();
       if (!res.ok) {
         if (data.code === "QUOTA_EXCEEDED") {
-          alert("Kuota halaman Anda telah habis. Silakan pilih paket di dashboard untuk menambah kuota.");
+          await showAlert(
+            "Kuota pembuatan halaman Anda telah habis. Silakan pilih paket di dashboard untuk menambah kuota.",
+            "warning",
+            "Kuota Habis"
+          );
           router.push("/dashboard");
           return;
         }
@@ -78,7 +88,7 @@ export default function NewBuilderPage() {
 
       router.push(`/builder/${data.page.id}`);
     } catch (e: any) {
-      alert(e.message || "Terjadi kesalahan");
+      await showAlert(e.message || "Terjadi kesalahan", "error");
       setLoading(false);
     }
   };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useModal } from "@/components/ui/ModalProvider";
 import {
   Plus,
   Trash2,
@@ -45,6 +46,7 @@ export default function FormFieldBuilder({
   initialFields: FormFieldItem[];
   onFieldsChange: (fields: FormFieldItem[]) => void;
 }) {
+  const { showAlert } = useModal();
   const [fields, setFields] = useState<FormFieldItem[]>(initialFields);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -55,9 +57,13 @@ export default function FormFieldBuilder({
     onFieldsChange(ordered);
   };
 
-  const handleAddField = () => {
+  const handleAddField = async () => {
     if (fields.length >= 10) {
-      alert("Maksimal 10 field pendaftaran untuk menjaga kecepatan & kemudahan pengisian.");
+      await showAlert(
+        "Maksimal 10 field pendaftaran untuk menjaga kecepatan & kemudahan pengisian bagi pendaftar.",
+        "warning",
+        "Batas Maksimum"
+      );
       return;
     }
 
@@ -72,9 +78,9 @@ export default function FormFieldBuilder({
     updateFieldsState([...fields, newField]);
   };
 
-  const handleRemoveField = (index: number) => {
+  const handleRemoveField = async (index: number) => {
     if (fields.length <= 1) {
-      alert("Minimal harus ada 1 field pendaftaran.");
+      await showAlert("Minimal harus ada 1 field formulir pendaftaran.", "warning");
       return;
     }
     const filtered = fields.filter((_, idx) => idx !== index);
@@ -117,7 +123,7 @@ export default function FormFieldBuilder({
       setSaveMessage("Form pendaftaran berhasil disimpan!");
       setTimeout(() => setSaveMessage(""), 3000);
     } catch (e: any) {
-      alert(e.message || "Terjadi kesalahan");
+      await showAlert(e.message || "Terjadi kesalahan saat menyimpan formulir", "error");
     } finally {
       setSaving(false);
     }

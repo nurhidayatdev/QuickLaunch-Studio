@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PAYMENT_METHODS, ADMIN_CONTACT, BankAccount } from "@/lib/payment-config";
+import { useModal } from "@/components/ui/ModalProvider";
 import {
   ShieldCheck,
   Clock,
@@ -41,6 +42,7 @@ export default function AdminPaymentsClient({
   currentUser,
 }: AdminPaymentsClientProps) {
   const router = useRouter();
+  const { showAlert, showConfirm } = useModal();
   const [activeTab, setActiveTab] = useState<"orders" | "users" | "settings">("orders");
   const [orders, setOrders] = useState<any[]>(initialOrders);
   const [users, setUsers] = useState<any[]>(initialUsers);
@@ -114,9 +116,13 @@ export default function AdminPaymentsClient({
     ]);
   };
 
-  const handleRemoveAccount = (index: number) => {
+  const handleRemoveAccount = async (index: number) => {
     if (settingsMethods.length <= 1) {
-      alert("Minimal harus ada 1 nomor rekening / tujuan pembayaran.");
+      await showAlert(
+        "Minimal harus ada 1 nomor rekening / tujuan pembayaran aktif di sistem.",
+        "warning",
+        "Rekening Wajib"
+      );
       return;
     }
     setSettingsMethods((prev) => prev.filter((_, i) => i !== index));
@@ -155,13 +161,13 @@ export default function AdminPaymentsClient({
   });
 
   const handleApprove = async (order: any) => {
-    if (
-      !confirm(
-        `Konfirmasi setujui pesanan #${order.orderNumber}?\n\nPengguna: ${order.user.name} (${order.user.email})\nPenambahan Kuota: +${order.quotaAdded} Halaman\nNominal: Rp${order.price.toLocaleString("id-ID")}`
-      )
-    ) {
-      return;
-    }
+    const confirmed = await showConfirm(
+      `Konfirmasi setujui pesanan #${order.orderNumber}?\n\nPengguna: ${order.user.name} (${order.user.email})\nPenambahan Kuota: +${order.quotaAdded} Halaman\nNominal: Rp${order.price.toLocaleString("id-ID")}`,
+      "Setujui Pembayaran",
+      "Ya, Setujui & Tambah Kuota",
+      "Batal"
+    );
+    if (!confirmed) return;
 
     setProcessingId(order.id);
     try {
@@ -186,10 +192,14 @@ export default function AdminPaymentsClient({
             : u
         )
       );
-      alert(`Pesanan #${order.orderNumber} berhasil disetujui! Kuota user ${order.user.name} telah bertambah.`);
+      await showAlert(
+        `Pesanan #${order.orderNumber} berhasil disetujui! Kuota akun ${order.user.name} telah bertambah +${order.quotaAdded}.`,
+        "success",
+        "Pembayaran Diverifikasi"
+      );
       router.refresh();
     } catch (e: any) {
-      alert(e.message || "Terjadi kesalahan");
+      await showAlert(e.message || "Terjadi kesalahan", "error");
     } finally {
       setProcessingId(null);
     }
@@ -224,12 +234,13 @@ export default function AdminPaymentsClient({
             : o
         )
       );
+      const rejectedNumber = rejectingOrder.orderNumber;
       setRejectingOrder(null);
       setRejectReason("");
-      alert(`Pesanan #${rejectingOrder.orderNumber} telah ditolak.`);
+      await showAlert(`Pesanan #${rejectedNumber} telah ditolak.`, "info", "Pesanan Ditolak");
       router.refresh();
     } catch (e: any) {
-      alert(e.message || "Terjadi kesalahan");
+      await showAlert(e.message || "Terjadi kesalahan", "error");
     } finally {
       setProcessingId(null);
     }
@@ -252,11 +263,11 @@ export default function AdminPaymentsClient({
           u.id === quotaModalUser.id ? { ...u, pageQuota: data.user.pageQuota } : u
         )
       );
-      alert(data.message);
+      await showAlert(data.message || "Kuota pengguna berhasil disesuaikan.", "success");
       setQuotaModalUser(null);
       router.refresh();
     } catch (e: any) {
-      alert(e.message || "Terjadi kesalahan");
+      await showAlert(e.message || "Terjadi kesalahan", "error");
     } finally {
       setProcessingId(null);
     }
