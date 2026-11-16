@@ -7,6 +7,7 @@ import TemplateRenderer, { TEMPLATE_LIST } from "@/components/templates/Template
 import FormFieldBuilder, { FormFieldItem } from "@/components/builder/FormFieldBuilder";
 import GoogleSheetsIntegration from "@/components/builder/GoogleSheetsIntegration";
 import PublishSuccessModal from "@/components/builder/PublishSuccessModal";
+import ImageCropperModal from "@/components/builder/ImageCropperModal";
 import { DEFAULT_WA_TEMPLATE, fillWhatsAppTemplate } from "@/lib/whatsapp";
 import { useModal } from "@/components/ui/ModalProvider";
 import { FONT_OPTIONS } from "@/lib/font-config";
@@ -32,6 +33,7 @@ import {
   Sparkles,
   QrCode,
   Upload,
+  Crop,
 } from "lucide-react";
 
 const ACCENT_COLORS = [
@@ -63,6 +65,8 @@ export default function BuilderEditor({
   const [saveStatus, setSaveStatus] = useState<string>("");
   const [pageStatus, setPageStatus] = useState<string>(initialPage.status || "draft");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [rawImageForCrop, setRawImageForCrop] = useState<string>("");
 
   const [fields, setFields] = useState<FormFieldItem[]>(initialPage.fields || []);
 
@@ -654,21 +658,97 @@ export default function BuilderEditor({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    URL Gambar Banner (Opsional)
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.bannerUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bannerUrl: e.target.value })
-                    }
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full min-h-[44px] rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Gunakan link gambar langsung (rasio 16:9 disarankan). Jika kosong, header akan memakai warna aksen atau gradasi.
-                  </p>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Gambar Banner Halaman (Rasio 16:9)
+                    </label>
+                    {formData.bannerUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRawImageForCrop(formData.bannerUrl);
+                          setCropModalOpen(true);
+                        }}
+                        className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      >
+                        <Crop className="h-3 w-3" />
+                        <span>Sesuaikan / Crop</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Upload File or Direct URL input */}
+                  <div className="space-y-2">
+                    <label className="flex flex-col items-center justify-center w-full min-h-[96px] border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl cursor-pointer bg-slate-50 hover:bg-blue-50/20 transition-all p-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            const rawUrl = event.target?.result as string;
+                            setRawImageForCrop(rawUrl);
+                            setCropModalOpen(true);
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="hidden"
+                      />
+                      {formData.bannerUrl ? (
+                        <div className="flex items-center gap-3 w-full">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={formData.bannerUrl}
+                            alt="Banner Preview"
+                            className="h-16 w-28 object-cover rounded-xl border border-slate-200 shadow-xs shrink-0"
+                          />
+                          <div className="flex-1 min-w-0 text-left">
+                            <span className="text-xs font-bold text-slate-900 block truncate">
+                              Banner Berhasil Dipasang ✓
+                            </span>
+                            <span className="text-[10px] text-slate-500 block">
+                              Klik area ini untuk unggah gambar baru atau klik &quot;Sesuaikan / Crop&quot;.
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center text-center">
+                          <Upload className="h-5 w-5 text-slate-400 mb-1" />
+                          <span className="text-xs font-semibold text-slate-700">
+                            Upload File Gambar Banner dari Komputer / HP
+                          </span>
+                          <span className="text-[10px] text-slate-400 mt-0.5">
+                            Bisa langsung Anda geser, zoom, dan potong sesuai bingkai 16:9.
+                          </span>
+                        </div>
+                      )}
+                    </label>
+
+                    {/* Or URL input option */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold shrink-0">Atau URL:</span>
+                      <input
+                        type="url"
+                        value={formData.bannerUrl}
+                        onChange={(e) =>
+                          setFormData({ ...formData, bannerUrl: e.target.value })
+                        }
+                        placeholder="https://images.unsplash.com/..."
+                        className="flex-1 min-h-[38px] rounded-xl border border-slate-300 px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none"
+                      />
+                      {formData.bannerUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, bannerUrl: "" })}
+                          className="text-[11px] font-semibold text-rose-600 hover:text-rose-800 shrink-0 px-2"
+                        >
+                          Hapus
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -986,6 +1066,15 @@ export default function BuilderEditor({
             </div>
           )}
         </div>
+        {/* Crop Banner Modal */}
+        <ImageCropperModal
+          isOpen={cropModalOpen}
+          imageSrc={rawImageForCrop}
+          onClose={() => setCropModalOpen(false)}
+          onCropComplete={(croppedDataUrl) => {
+            setFormData({ ...formData, bannerUrl: croppedDataUrl });
+          }}
+        />
       </div>
     </div>
   );
