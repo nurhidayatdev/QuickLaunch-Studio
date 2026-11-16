@@ -57,6 +57,7 @@ export async function PUT(
       waNumber,
       waMessageTemplate,
       accentColor,
+      fontFamily,
       slug,
       status,
       googleSheetsWebhookUrl,
@@ -98,6 +99,7 @@ export async function PUT(
             ? waMessageTemplate
             : existing.waMessageTemplate,
         accentColor: accentColor ?? existing.accentColor,
+        fontFamily: fontFamily ?? (existing as any).fontFamily ?? "inter",
         slug: finalSlug,
         status: status ?? existing.status,
         googleSheetsWebhookUrl:

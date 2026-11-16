@@ -25,6 +25,7 @@ import {
 import { FormFieldItem } from "../builder/FormFieldBuilder";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
 import { TemplatePageData } from "./ModernEventTemplate";
+import { getFontClassName } from "@/lib/font-config";
 
 export default function CardCompactTemplate({
   data,
@@ -111,7 +112,7 @@ export default function CardCompactTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans p-3.5 sm:p-6 pb-20">
+    <div className={`min-h-screen bg-slate-100 text-slate-800 p-3.5 sm:p-6 pb-20 ${getFontClassName(data.fontFamily)}`}>
       <main className="max-w-md mx-auto space-y-3.5">
         {/* Card 1: Top Bento Profile / Hero */}
         <section className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-lg shadow-slate-200/50 space-y-4">

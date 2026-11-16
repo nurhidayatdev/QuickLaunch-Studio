@@ -24,6 +24,7 @@ import {
 import { FormFieldItem } from "../builder/FormFieldBuilder";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
 import { TemplatePageData } from "./ModernEventTemplate";
+import { getFontClassName } from "@/lib/font-config";
 
 export default function BoldMinimalistTemplate({
   data,
@@ -110,7 +111,7 @@ export default function BoldMinimalistTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-black text-slate-100 font-sans selection:bg-white selection:text-black pb-20">
+    <div className={`min-h-screen bg-black text-slate-100 selection:bg-white selection:text-black pb-20 ${getFontClassName(data.fontFamily)}`}>
       {/* High-Contrast Bold Header with Grid and Dark Aura */}
       <header className="relative border-b border-slate-800/80 bg-gradient-to-b from-slate-950 via-slate-900 to-black pt-16 pb-12 px-4 sm:px-6 overflow-hidden">
         {/* Glow ambient background aura */}

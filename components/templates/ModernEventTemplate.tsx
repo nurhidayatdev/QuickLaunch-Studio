@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { FormFieldItem } from "../builder/FormFieldBuilder";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
+import { getFontClassName } from "@/lib/font-config";
 
 export interface TemplatePageData {
   id?: string;
@@ -37,6 +38,7 @@ export interface TemplatePageData {
   waNumber?: string | null;
   waMessageTemplate?: string | null;
   accentColor?: string;
+  fontFamily?: string;
   category?: string;
 }
 
@@ -125,7 +127,7 @@ export default function ModernEventTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans">
+    <div className={`min-h-screen bg-slate-100 text-slate-900 pb-16 ${getFontClassName(data.fontFamily)}`}>
       {/* Top Banner & Header Hero with Ambient Gradient */}
       <div className="relative w-full bg-slate-950 overflow-hidden">
         {data.bannerUrl ? (

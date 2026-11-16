@@ -9,6 +9,7 @@ import GoogleSheetsIntegration from "@/components/builder/GoogleSheetsIntegratio
 import PublishSuccessModal from "@/components/builder/PublishSuccessModal";
 import { DEFAULT_WA_TEMPLATE, fillWhatsAppTemplate } from "@/lib/whatsapp";
 import { useModal } from "@/components/ui/ModalProvider";
+import { FONT_OPTIONS } from "@/lib/font-config";
 import {
   ArrowLeft,
   Save,
@@ -74,6 +75,7 @@ export default function BuilderEditor({
     bannerUrl: initialPage.bannerUrl || "",
     waNumber: initialPage.waNumber || "",
     accentColor: initialPage.accentColor || "#2563eb",
+    fontFamily: initialPage.fontFamily || "inter",
     slug: initialPage.slug || "",
     googleSheetsWebhookUrl: initialPage.googleSheetsWebhookUrl || "",
     waMessageTemplate: initialPage.waMessageTemplate || DEFAULT_WA_TEMPLATE,
@@ -618,6 +620,43 @@ export default function BuilderEditor({
                           <span className="text-xs font-medium text-slate-800 line-clamp-1">
                             {c.name}
                           </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-2">
+                    Pilihan Tipografi / Font (5 Gaya)
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {FONT_OPTIONS.map((f) => {
+                      const isSelected = (formData.fontFamily || "inter") === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() =>
+                            setFormData({ ...formData, fontFamily: f.id })
+                          }
+                          className={`p-3 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/30"
+                              : "border-slate-200 bg-white hover:border-slate-300"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className={`text-sm font-bold text-slate-900 ${f.className}`}>
+                              {f.name}
+                            </span>
+                            <span className="text-[10px] font-semibold bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">
+                              {f.category}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                            {f.description}
+                          </p>
                         </button>
                       );
                     })}

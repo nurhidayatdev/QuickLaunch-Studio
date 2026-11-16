@@ -56,6 +56,7 @@ model Page {
   waNumber     String?  // Kontak WhatsApp panitia / penjual
   waMessageTemplate String? // Template draf pesan konfirmasi WA
   accentColor  String   @default("#2563eb") // Hex warna aksen
+  fontFamily   String   @default("inter") // inter, jakarta, poppins, playfair, jetbrains
   status       String   @default("draft") // draft, published
   slug         String   @unique
   customDomain String?
