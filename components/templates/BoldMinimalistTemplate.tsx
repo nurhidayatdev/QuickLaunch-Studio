@@ -20,6 +20,7 @@ import {
   Store,
   ShieldCheck,
   Check,
+  QrCode,
 } from "lucide-react";
 import { FormFieldItem } from "../builder/FormFieldBuilder";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
@@ -200,6 +201,26 @@ export default function BoldMinimalistTemplate({
             </div>
           )}
         </div>
+
+        {/* QR Code QRIS (Jika ada) */}
+        {data.qrisImageUrl && (
+          <div className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-center space-y-3">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">
+              [ SCAN QRIS PEMBAYARAN ]
+            </span>
+            <div className="p-3 bg-white rounded-2xl inline-block shadow-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={data.qrisImageUrl}
+                alt="QRIS"
+                className="max-h-52 w-auto object-contain rounded"
+              />
+            </div>
+            <p className="text-[11px] font-mono text-slate-400">
+              Mendukung semua bank dan e-wallet nasional.
+            </p>
+          </div>
+        )}
 
         {/* High-Contrast Form Box */}
         <section className="rounded-3xl border border-slate-800 bg-slate-950/90 p-6 sm:p-7 shadow-2xl relative overflow-hidden">

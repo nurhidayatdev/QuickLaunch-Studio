@@ -355,6 +355,26 @@ export default function PackageCheckoutModal({
                 </div>
               </div>
 
+              {/* QRIS Admin Box (Jika tersedia) */}
+              {(adminContact as any).adminQrisImage && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-center space-y-2">
+                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                    Scan Barcode QRIS Resmi Admin
+                  </span>
+                  <div className="p-2 bg-white rounded-xl border border-slate-200 inline-block shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={(adminContact as any).adminQrisImage}
+                      alt="QRIS Admin"
+                      className="max-h-48 w-auto object-contain rounded"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    Bisa scan melalui BCA Mobile, Livin, GoPay, OVO, Dana, LinkAja, atau ShopeePay.
+                  </p>
+                </div>
+              )}
+
               {/* Upload Proof Form */}
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-slate-700">

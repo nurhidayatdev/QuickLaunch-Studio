@@ -54,6 +54,7 @@ export async function PUT(
       location,
       price,
       bannerUrl,
+      qrisImageUrl,
       waNumber,
       waMessageTemplate,
       accentColor,
@@ -93,6 +94,7 @@ export async function PUT(
         location: location ?? existing.location,
         price: price ?? existing.price,
         bannerUrl: bannerUrl ?? existing.bannerUrl,
+        qrisImageUrl: qrisImageUrl !== undefined ? qrisImageUrl : (existing as any).qrisImageUrl,
         waNumber: waNumber ?? existing.waNumber,
         waMessageTemplate:
           waMessageTemplate !== undefined

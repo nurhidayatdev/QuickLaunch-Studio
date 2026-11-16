@@ -22,6 +22,7 @@ import {
   Users,
   Store,
   Truck,
+  QrCode,
 } from "lucide-react";
 import { FormFieldItem } from "../builder/FormFieldBuilder";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
@@ -35,6 +36,7 @@ export interface TemplatePageData {
   location?: string | null;
   price?: string | null;
   bannerUrl?: string | null;
+  qrisImageUrl?: string | null;
   waNumber?: string | null;
   waMessageTemplate?: string | null;
   accentColor?: string;
@@ -279,6 +281,32 @@ export default function ModernEventTemplate({
             )}
           </div>
         </section>
+
+        {/* QR Code QRIS Pembayaran Box (Jika diisi pengelola) */}
+        {data.qrisImageUrl && (
+          <section className="bg-white rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-900/5 border border-slate-200/90 text-center space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+              <QrCode className="h-3.5 w-3.5 text-blue-600" />
+              <span>QRIS Pembayaran Resmi</span>
+            </div>
+            <h3 className="text-base font-extrabold text-slate-900">
+              Scan QRIS untuk Pembayaran Langsung
+            </h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Mendukung semua aplikasi e-wallet (GoPay, OVO, Dana, ShopeePay) dan Mobile Banking.
+            </p>
+            <div className="pt-2 flex justify-center">
+              <div className="p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-md inline-block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={data.qrisImageUrl}
+                  alt="QRIS Pembayaran"
+                  className="max-h-56 w-auto object-contain rounded-lg"
+                />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Form Pendaftaran / Checkout Section */}
         <section className="bg-white rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-900/5 border border-slate-200/90">

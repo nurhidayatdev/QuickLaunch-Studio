@@ -21,7 +21,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { paymentMethods, adminWaNumber } = body;
+    const { paymentMethods, adminWaNumber, adminQrisImage } = body;
 
     if (!Array.isArray(paymentMethods) || paymentMethods.length === 0) {
       return NextResponse.json(
@@ -48,20 +48,23 @@ export async function PUT(req: Request) {
         id: "default",
         bankAccounts: JSON.stringify(paymentMethods),
         adminWaNumber: cleanWaNumber,
+        adminQrisImage: adminQrisImage || null,
       },
       update: {
         bankAccounts: JSON.stringify(paymentMethods),
         adminWaNumber: cleanWaNumber,
+        adminQrisImage: adminQrisImage !== undefined ? adminQrisImage : undefined,
       },
     });
 
     return NextResponse.json({
-      message: "Pengaturan rekening dan kontak admin berhasil diperbarui.",
+      message: "Pengaturan rekening, QRIS, dan kontak admin berhasil diperbarui.",
       setting: {
         paymentMethods,
         adminContact: {
           waNumber: saved.adminWaNumber,
           adminEmail: ADMIN_CONTACT.adminEmail,
+          adminQrisImage: saved.adminQrisImage,
         },
       },
     });

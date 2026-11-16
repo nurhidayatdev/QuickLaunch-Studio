@@ -114,6 +114,7 @@ export async function getDynamicPaymentConfig() {
         adminContact: {
           waNumber: setting.adminWaNumber || ADMIN_CONTACT.waNumber,
           adminEmail: ADMIN_CONTACT.adminEmail,
+          adminQrisImage: setting.adminQrisImage || null,
         },
       };
     }
@@ -123,7 +124,10 @@ export async function getDynamicPaymentConfig() {
 
   return {
     paymentMethods: PAYMENT_METHODS,
-    adminContact: ADMIN_CONTACT,
+    adminContact: {
+      ...ADMIN_CONTACT,
+      adminQrisImage: null as string | null,
+    },
   };
 }
 

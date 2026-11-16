@@ -21,6 +21,7 @@ import {
   Star,
   Store,
   BadgeCheck,
+  QrCode,
 } from "lucide-react";
 import { FormFieldItem } from "../builder/FormFieldBuilder";
 import { buildWhatsAppConfirmationLink } from "@/lib/whatsapp";
@@ -239,6 +240,26 @@ export default function CardCompactTemplate({
             </div>
           )}
         </div>
+
+        {/* Bento QR Code QRIS Card */}
+        {data.qrisImageUrl && (
+          <section className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm text-center space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-700">
+              <QrCode className="h-3 w-3 text-indigo-600" />
+              <span>QRIS Pembayaran</span>
+            </span>
+            <div className="flex justify-center pt-1">
+              <div className="p-2.5 bg-white rounded-2xl border border-slate-200 shadow-sm inline-block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={data.qrisImageUrl}
+                  alt="QRIS"
+                  className="max-h-48 w-auto object-contain rounded"
+                />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Card 3: Compact Registration / Order Form */}
         <section className="bg-white rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/60 border border-slate-200/90 space-y-4">

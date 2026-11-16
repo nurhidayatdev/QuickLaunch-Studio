@@ -60,6 +60,7 @@ export default function AdminPaymentsClient({
   // Settings State
   const [settingsMethods, setSettingsMethods] = useState<BankAccount[]>(PAYMENT_METHODS);
   const [settingsWa, setSettingsWa] = useState(ADMIN_CONTACT.waNumber);
+  const [settingsQris, setSettingsQris] = useState<string | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsNotice, setSettingsNotice] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
@@ -72,6 +73,9 @@ export default function AdminPaymentsClient({
         }
         if (data.adminContact?.waNumber) {
           setSettingsWa(data.adminContact.waNumber);
+        }
+        if (data.adminContact?.adminQrisImage) {
+          setSettingsQris(data.adminContact.adminQrisImage);
         }
       })
       .catch((err) => console.error("Error fetching admin settings:", err));
@@ -87,13 +91,14 @@ export default function AdminPaymentsClient({
         body: JSON.stringify({
           paymentMethods: settingsMethods,
           adminWaNumber: settingsWa,
+          adminQrisImage: settingsQris,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal menyimpan pengaturan");
 
-      setSettingsNotice({ type: "success", msg: "Nomor rekening dan kontak WhatsApp berhasil diperbarui!" });
+      setSettingsNotice({ type: "success", msg: "Nomor rekening, QRIS, dan kontak WhatsApp berhasil diperbarui!" });
       setTimeout(() => setSettingsNotice(null), 4000);
       router.refresh();
     } catch (err: any) {
@@ -851,6 +856,81 @@ export default function AdminPaymentsClient({
               <p className="text-[11px] text-slate-400">
                 Saat pelanggan selesai mengunggah screenshot bukti transfer, tombol &quot;Konfirmasi via WhatsApp&quot; akan langsung membuka chat ke nomor ini.
               </p>
+            </div>
+
+            {/* Admin QR Code QRIS Upload */}
+            <div className="pt-2 border-t border-slate-100">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Gambar QR Code QRIS Admin (Opsional)
+              </label>
+              <label className="flex flex-col items-center justify-center w-full min-h-[110px] border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl cursor-pointer bg-slate-50 hover:bg-blue-50/20 transition-all p-3.5">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const img = new Image();
+                      img.onload = () => {
+                        const canvas = document.createElement("canvas");
+                        const MAX_WIDTH = 900;
+                        const scaleSize = MAX_WIDTH / img.width;
+                        const width = img.width > MAX_WIDTH ? MAX_WIDTH : img.width;
+                        const height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext("2d");
+                        if (ctx) {
+                          ctx.drawImage(img, 0, 0, width, height);
+                          const compressed = canvas.toDataURL("image/jpeg", 0.75);
+                          setSettingsQris(compressed);
+                        }
+                      };
+                      img.src = event.target?.result as string;
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className="hidden"
+                />
+                {settingsQris ? (
+                  <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={settingsQris}
+                      alt="Admin QRIS"
+                      className="h-16 w-16 object-contain rounded-lg border border-slate-200 bg-white p-1"
+                    />
+                    <div className="text-left">
+                      <span className="text-xs font-bold text-emerald-600 block">
+                        QRIS Admin Berhasil Diunggah ✓
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        Akan ditampilkan di popup checkout pelanggan saat membeli paket kuota
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center">
+                    <span className="text-xs font-semibold text-slate-700">
+                      Unggah Barcode QRIS Resmi QuickLaunch
+                    </span>
+                    <span className="text-[10px] text-slate-400 mt-0.5">
+                      Pelanggan dapat scan langsung saat checkout paket kuota halaman.
+                    </span>
+                  </div>
+                )}
+              </label>
+              {settingsQris && (
+                <button
+                  type="button"
+                  onClick={() => setSettingsQris(null)}
+                  className="mt-1.5 text-[11px] font-semibold text-rose-600 hover:text-rose-800"
+                >
+                  Hapus QRIS Admin
+                </button>
+              )}
             </div>
           </div>
 

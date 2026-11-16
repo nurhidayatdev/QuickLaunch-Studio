@@ -53,6 +53,7 @@ model Page {
   location     String?  // Lokasi fisik / online
   price        String?  // Info harga / tiket / gratis
   bannerUrl    String?  // URL gambar / banner
+  qrisImageUrl String?  // URL / Base64 gambar QR code QRIS pembayaran
   waNumber     String?  // Kontak WhatsApp panitia / penjual
   waMessageTemplate String? // Template draf pesan konfirmasi WA
   accentColor  String   @default("#2563eb") // Hex warna aksen
@@ -99,5 +100,6 @@ model SystemSetting {
   id            String   @id @default("default")
   bankAccounts  String   // JSON string of BankAccount[]
   adminWaNumber String   @default("081234567890")
+  adminQrisImage String? // Base64 / URL gambar QRIS Admin
   updatedAt     DateTime @updatedAt
 }
