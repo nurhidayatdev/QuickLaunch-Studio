@@ -9,7 +9,7 @@
 - **Nama Produk**: QuickLaunch Studio (`quicklaunch.id`)
 - **Tagline**: *"Bikin Landing Page Event & Produk UMKM Dalam 60 Detik Tanpa Coding!"*
 - **Target Audiens**: Event Organizer, Panitia Seminar/Webinar, Komunitas Kampus, Pelaku UMKM, Online Seller.
-- **Goal Pamflet**: Menarik perhatian audiens dalam 3 detik, menunjukkan kemudahan instan (60 detik), fitur unggulan (Direct WhatsApp & Google Sheets), dan harga sangat terjangkau (Mulai Gratis / Rp15.000).
+- **Goal Pamflet**: Menarik perhatian audiens dalam 3 detik, menunjukkan kemudahan instan (60 detik), fitur unggulan (Direct WhatsApp & Google Sheets), dan transparansi harga terjangkau (Mulai Rp25.000 sekali bayar, tanpa langganan).
 
 ---
 
@@ -21,27 +21,27 @@ A professional high-converting commercial promo poster with 4:3 aspect ratio for
 Theme & Mood: Modern tech startup, high credibility, sleek glassmorphism, clean minimalistic enterprise SaaS aesthetic. Soft ambient gradient lighting in deep indigo (#0F172A), cobalt blue (#2563eb), and vibrant mint green accents. Ultra crisp typography and balanced composition.
 
 Layout & Structure (4:3 Horizontal Composition):
-- Left Side (45% width): 
+- Left Side (46% width): 
   - Eyebrow pill tag: [⚡ PLATFORM NO-CODE #1 UNTUK EVENT & UMKM] in frosted blue pill badge.
-  - Bold punchy main headline: "Bikin Landing Page 60 Detik, Langsung Siap Jualan!"
-  - Subheadline: "Solusi kilat buat registrasi seminar, webinar, konser, & order produk UMKM tanpa pusing coding."
+  - Bold punchy main headline: "Bikin Landing Page 60 Detik, Langsung Siap Sebar!"
+  - Subheadline: "Solusi praktis buat pendaftaran seminar, webinar, konser, & order produk UMKM tanpa ribet coding."
   - 4 Bullet Point Feature Chips with icons:
-    * 📱 100% Mobile-First & Loading Secepat Kilat
+    * 📱 100% Mobile-First & Loading Secepat Kilat (PageSpeed 90+)
     * 📊 Otomatis Terhubung ke Google Sheets
     * 💬 Direct Checkout / Konfirmasi WhatsApp Otomatis
-    * 🎨 3 Pilihan Template Desain Modern Elegan
-  - Call to Action button & pricing badge: 
-    * Primary CTA: "Coba Gratis Sekarang → quicklaunch.id"
-    * Price tag: "Mulai dari Rp0 (Paket Starter Gratis Selamanya)"
+    * 🎨 3 Pilihan Template Desain Modern Siap Pakai
+  - Pricing & Call to Action:
+    * Price tag pill badge: "Mulai Rp25.000 / event • Sekali Bayar Selamanya • Tanpa Biaya Bulanan"
+    * Primary CTA Button: "Mulai Sekarang → quicklaunch.id"
 
-- Right Side (55% width):
+- Right Side (54% width):
   - A 3D isometric floating device showcase featuring:
     * A sleek modern flagship smartphone with thin titanium bezels, displaying an aesthetic, colorful mobile registration landing page with a clear event banner, countdown badge, form input fields, and a prominent green WhatsApp confirmation button.
     * Layered behind the smartphone is a translucent glassmorphism dashboard card showing live analytics: "Total Pendaftar: 1.420+", a mini bar chart, and a green sync status badge "Google Sheets Connected ✓".
     * Floating subtle 3D micro-elements around the device: Google Sheets spreadsheet logo icon, WhatsApp chat bubble icon with checkmark, and a lightning bolt badge.
 
 Background & Lighting:
-- Subtle dark-mode or clean light-slate studio backdrop with subtle radial cyan-blue ambient glow.
+- Subtle clean light-slate or dark-mode studio backdrop with soft radial cyan-blue ambient glow.
 - Micro dot-grid matrix texture in the background for high-tech SaaS feel.
 - Photorealistic render, 8k resolution, perfect visual hierarchy, zero visual clutter, optimized for marketing presentations and horizontal social feeds.
 ```
@@ -61,30 +61,32 @@ Jika didesain manual di Canva / Figma / CorelDraw:
   # Bikin Landing Page Dalam 60 Detik.  
   ## Langsung Siap Sebar & Terima Pesanan!
 * **Sub-judul**:  
-  Tinggalkan form manual yang ribet. Gunakan landing page profesional yang otomatis rekap data ke Google Sheets dan kirim konfirmasi instan ke WhatsApp.
+  Tinggalkan formulir manual yang membingungkan. Gunakan landing page profesional yang otomatis rekap data ke Google Sheets dan kirim konfirmasi instan ke WhatsApp.
 
 ### C. 4 Keunggulan Utama (Value Proposition)
 | Fitur | Deskripsi Singkat | Ikon Rekomendasi |
 | :--- | :--- | :--- |
-| **Kilat & No-Code** | Tinggal isi judul, jadwal, & harga—langsung live! | ⚡ Lightning |
-| **Auto Google Sheets** | Setiap pendaftar otomatis masuk ke spreadsheet Anda. | 📊 Sheet / Database |
-| **Direct WhatsApp** | Pembeli/peserta langsung konfirmasi via chat resmi. | 💬 Chat Bubble |
-| **Anti Lemot (Mobile 90+)** | Desain super responsif, ringan dibuka di HP kuota minim. | 🚀 Rocket / Mobile |
+| **Kilat & No-Code** | Tinggal isi judul, jadwal, & harga—langsung tayang dalam 60 detik! | ⚡ Lightning |
+| **Auto Google Sheets** | Setiap pendaftar otomatis tercatat rapi ke spreadsheet panitia. | 📊 Sheet / Database |
+| **Direct WhatsApp** | Peserta/pembeli langsung terhubung via chat WhatsApp resmi. | 💬 Chat Bubble |
+| **Anti Lemot (Mobile 90+)** | Format super responsif, hemat kuota dan cepat dibuka di smartphone. | 🚀 Rocket / Mobile |
 
 ### D. Mockup Visual (Center-Right)
 * Mockup iPhone/HP menampilkan landing page `quicklaunch.id/p/seminar-ai-2026`.
-* Kartu pop-up kecil:  
-  * `Notifikasi: 1 Pendaftar Baru Masuk (Budi - Jakarta)`
-  * `Spreadsheet Terupdate ✓`
+* Kartu pop-up analitik transparan di samping HP:  
+  * `Total Pendaftar: 1.420+ Peserta`
+  * `Google Sheets Auto-Sync: Aktif ✓`
 
-### E. Penawaran & Call To Action (Footer)
-* **Harga**:
-  * **Free Starter**: Rp 0 *(Buat & coba langsung)*
-  * **Paket Basic**: Rp 15.000 / 3 Event
-  * **Paket Unlimited**: Rp 49.000 / Tanpa Batas
+### E. Penawaran & Paket Harga Real (Sesuai Landing Page)
+* **Skema Bayar**: **Sekali Bayar Selamanya (Tanpa Biaya Langganan Bulanan)**
+* **Daftar Paket Resmi**:
+  1. **Paket Single Event**: **Rp 25.000** *(1 Landing Page Aktif, 3 Template, Form Kustom, Link WA)*
+  2. **Paket Pro Komunitas (Paling Populer)**: **Rp 50.000** *(3 Landing Page Aktif, Auto-Sync Google Sheets, Duplikasi 1-Klik)*
+  3. **Paket Bisnis & Agensi**: **Rp 99.000** *(10 Landing Page Aktif, Kapasitas Besar, WhatsApp Support Prioritas)*
+* **Metode Pembayaran**: Transfer Bank BCA, Mandiri, & QRIS (GoPay, OVO, Dana).
 * **Call to Action**:  
   **Kunjungi Sekarang:** 👉 `quicklaunch.id`  
-  *Atau hubungi admin kami untuk demo kilat.*
+  *Daftar & buat landing page pertama Anda hari ini!*
 
 ---
 
