@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageDetailModal from "@/components/dashboard/PageDetailModal";
 import PackageCheckoutModal from "@/components/pricing/PackageCheckoutModal";
+import AccountSettingsModal from "@/components/account/AccountSettingsModal";
 import { ADMIN_CONTACT } from "@/lib/payment-config";
 import { useModal } from "@/components/ui/ModalProvider";
 import {
@@ -64,6 +65,7 @@ export default function DashboardClient({
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const [selectedDetail, setSelectedDetail] = useState<PageItem | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [pendingOrder, setPendingOrder] = useState<any>(initialPendingOrder);
 
   const quota = currentUser?.pageQuota || 0;
@@ -214,6 +216,16 @@ export default function DashboardClient({
                 </div>
               )}
             </div>
+
+            {/* Account Settings & Security Button */}
+            <button
+              onClick={() => setIsAccountModalOpen(true)}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-xs transition-colors cursor-pointer"
+              title="Kelola Profil, Sandi & Keamanan Akun"
+            >
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <span>Keamanan Akun</span>
+            </button>
 
             {/* Buy Package Button */}
             {!isAdmin && (
@@ -505,6 +517,16 @@ export default function DashboardClient({
           router.refresh();
         }}
       />
+
+      {/* Account Settings & Security Modal */}
+      {currentUser && (
+        <AccountSettingsModal
+          isOpen={isAccountModalOpen}
+          onClose={() => setIsAccountModalOpen(false)}
+          currentUser={currentUser}
+          onUserUpdated={() => router.refresh()}
+        />
+      )}
     </div>
   );
 }

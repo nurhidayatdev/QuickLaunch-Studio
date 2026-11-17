@@ -1,21 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, Rocket, ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
+import { LogOut, Rocket, ShieldCheck, ArrowRight, Sparkles, Settings, User } from "lucide-react";
+import AccountSettingsModal from "@/components/account/AccountSettingsModal";
 
 interface NavbarProps {
   user?: {
+    id?: string;
     name: string;
     email: string;
     role?: string;
     package?: string;
     pageQuota?: number;
+    createdAt?: string | Date;
   } | null;
 }
 
 export default function Navbar({ user }: NavbarProps) {
   const router = useRouter();
+  const [currentUserState, setCurrentUserState] = useState(user);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+
+  const activeUser = currentUserState || user;
 
   const handleLogout = async () => {
     try {
@@ -61,9 +69,9 @@ export default function Navbar({ user }: NavbarProps) {
           </span>
         </Link>
 
-        {user ? (
-          <div className="flex items-center gap-3">
-            {user.role === "admin" && (
+        {activeUser ? (
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {activeUser.role === "admin" && (
               <Link
                 href="/admin/payments"
                 className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-xl bg-amber-500/10 text-amber-800 border border-amber-300 px-3 py-1 text-xs font-bold hover:bg-amber-500/20 transition-colors shadow-xs"
@@ -73,20 +81,26 @@ export default function Navbar({ user }: NavbarProps) {
               </Link>
             )}
 
-            {/* User Profile Chip */}
-            <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl py-1 px-2.5">
-              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center text-[11px] font-bold shadow-xs shrink-0">
-                {getInitials(user.name)}
+            {/* User Profile Chip (Clickable to open Account Settings) */}
+            <button
+              type="button"
+              onClick={() => setIsAccountModalOpen(true)}
+              className="flex items-center gap-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 hover:border-blue-300 rounded-2xl py-1 px-2.5 transition-all text-left group cursor-pointer"
+              title="Klik untuk membuka Pengaturan & Keamanan Akun"
+            >
+              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center text-[11px] font-bold shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                {getInitials(activeUser.name)}
               </div>
               <div className="hidden sm:flex flex-col text-left leading-tight">
-                <span className="text-xs font-bold text-slate-900 line-clamp-1 max-w-[140px]">
-                  {user.name}
+                <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 max-w-[130px]">
+                  {activeUser.name}
                 </span>
-                <span className="text-[10px] text-slate-400 line-clamp-1 max-w-[140px]">
-                  {user.role === "admin" ? "Administrator" : user.email}
+                <span className="text-[10px] text-slate-400 line-clamp-1 max-w-[130px]">
+                  {activeUser.role === "admin" ? "Administrator" : "Pengaturan Akun"}
                 </span>
               </div>
-            </div>
+              <Settings className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 group-hover:rotate-45 transition-all ml-0.5" />
+            </button>
 
             <button
               onClick={handleLogout}
@@ -115,6 +129,17 @@ export default function Navbar({ user }: NavbarProps) {
           </div>
         )}
       </div>
+
+      {activeUser && (
+        <AccountSettingsModal
+          isOpen={isAccountModalOpen}
+          onClose={() => setIsAccountModalOpen(false)}
+          currentUser={activeUser as any}
+          onUserUpdated={(updated) =>
+            setCurrentUserState((prev: any) => ({ ...prev, ...updated }))
+          }
+        />
+      )}
     </header>
   );
 }

@@ -13,6 +13,8 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export default function RegisterPage() {
@@ -20,8 +22,20 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const hasLength = password.length >= 6;
+  const hasStrongLength = password.length >= 8;
+  const hasNumber = /[0-9]/.test(password);
+  const hasLetter = /[a-zA-Z]/.test(password);
+
+  let strengthScore = 0;
+  if (hasLength) strengthScore += 1;
+  if (hasStrongLength) strengthScore += 1;
+  if (hasNumber) strengthScore += 1;
+  if (hasLetter) strengthScore += 1;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,26 +145,92 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-bold text-slate-700 mb-1.5"
-              >
-                Kata Sandi (Min. 6 Karakter)
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="password"
+                  className="block text-xs font-bold text-slate-700"
+                >
+                  Kata Sandi
+                </label>
+                {password.length > 0 && (
+                  <span
+                    className={`text-[10px] font-bold ${
+                      strengthScore <= 1
+                        ? "text-red-500"
+                        : strengthScore <= 3
+                        ? "text-amber-500"
+                        : "text-emerald-500"
+                    }`}
+                  >
+                    {strengthScore <= 1
+                      ? "Lemah"
+                      : strengthScore <= 3
+                      ? "Sedang"
+                      : "Kuat"}
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full min-h-[44px] pl-10 pr-3.5 rounded-xl border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/15 focus:outline-none transition-all bg-slate-50/50 focus:bg-white"
+                  placeholder="Minimal 6-8 karakter..."
+                  className="w-full min-h-[44px] pl-10 pr-10 rounded-xl border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/15 focus:outline-none transition-all bg-slate-50/50 focus:bg-white"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+
+              {password.length > 0 && (
+                <div className="mt-1.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex gap-1">
+                  <div
+                    className={`h-full flex-1 rounded-full ${
+                      strengthScore >= 1
+                        ? strengthScore <= 1
+                          ? "bg-red-500"
+                          : strengthScore <= 3
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                        : "bg-slate-200"
+                    }`}
+                  />
+                  <div
+                    className={`h-full flex-1 rounded-full ${
+                      strengthScore >= 2
+                        ? strengthScore <= 3
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                        : "bg-slate-200"
+                    }`}
+                  />
+                  <div
+                    className={`h-full flex-1 rounded-full ${
+                      strengthScore >= 3
+                        ? strengthScore <= 3
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                        : "bg-slate-200"
+                    }`}
+                  />
+                  <div
+                    className={`h-full flex-1 rounded-full ${
+                      strengthScore >= 4 ? "bg-emerald-500" : "bg-slate-200"
+                    }`}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="pt-2">

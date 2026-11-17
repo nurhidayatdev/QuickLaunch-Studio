@@ -16,6 +16,8 @@ model User {
   role         String         @default("user") // user, admin
   package      String         @default("none") // none, single, pro, business
   pageQuota    Int            @default(0) // Kuota pembuatan landing page
+  resetToken   String?        // Token untuk reset / lupa password
+  resetExpires DateTime?      // Waktu kadaluarsa token reset
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   pages        Page[]
