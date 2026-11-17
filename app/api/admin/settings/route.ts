@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { PAYMENT_METHODS, ADMIN_CONTACT, getDynamicPaymentConfig } from "@/lib/payment-config";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   const user = await getCurrentUser();
   if (!user || user.role !== "admin") {

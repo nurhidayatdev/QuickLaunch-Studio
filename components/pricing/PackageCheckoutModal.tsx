@@ -38,14 +38,13 @@ export default function PackageCheckoutModal({
   onOrderSuccess,
 }: Props) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [methods, setMethods] = useState<BankAccount[]>(PAYMENT_METHODS);
-  const [adminContact, setAdminContact] = useState(ADMIN_CONTACT);
+  const [methods, setMethods] = useState<BankAccount[]>([]);
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [adminContact, setAdminContact] = useState<any>(ADMIN_CONTACT);
   const [selectedPackage, setSelectedPackage] = useState<PackageItem>(
     PAYMENT_PACKAGES[1] // Pro as default
   );
-  const [selectedMethod, setSelectedMethod] = useState<BankAccount>(
-    PAYMENT_METHODS[0]
-  );
+  const [selectedMethod, setSelectedMethod] = useState<BankAccount | null>(null);
   const [accountHolder, setAccountHolder] = useState("");
   const [proofImage, setProofImage] = useState<string | null>(null);
   const [proofFileName, setProofFileName] = useState("");
@@ -56,20 +55,44 @@ export default function PackageCheckoutModal({
 
   useEffect(() => {
     if (isOpen) {
-      fetch("/api/packages")
+      setLoadingConfig(true);
+      fetch(`/api/packages?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache",
+        },
+      })
         .then((r) => r.json())
         .then((data) => {
-          if (data.paymentMethods && data.paymentMethods.length > 0) {
+          if (data.paymentMethods && Array.isArray(data.paymentMethods) && data.paymentMethods.length > 0) {
             setMethods(data.paymentMethods);
             setSelectedMethod(data.paymentMethods[0]);
+          } else {
+            setMethods(PAYMENT_METHODS);
+            setSelectedMethod(PAYMENT_METHODS[0]);
           }
           if (data.adminContact) {
             setAdminContact(data.adminContact);
           }
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.error("Error fetching packages payment config:", err);
+          setMethods(PAYMENT_METHODS);
+          setSelectedMethod(PAYMENT_METHODS[0]);
+        })
+        .finally(() => {
+          setLoadingConfig(false);
+        });
     }
   }, [isOpen]);
+
+  const activeMethod = selectedMethod || (methods.length > 0 ? methods[0] : PAYMENT_METHODS[0]);
+  const isQrisSelected =
+    activeMethod?.id === "qris" ||
+    activeMethod?.bankName?.toLowerCase().includes("qris") ||
+    activeMethod?.badge?.toLowerCase().includes("instant") ||
+    activeMethod?.badge?.toLowerCase().includes("e-wallet");
 
   if (!isOpen) return null;
 
@@ -132,7 +155,7 @@ export default function PackageCheckoutModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           packageId: selectedPackage.id,
-          paymentMethod: selectedMethod.bankName,
+          paymentMethod: activeMethod.bankName,
           accountHolder,
           proofImageUrl: proofImage,
         }),
@@ -282,52 +305,77 @@ export default function PackageCheckoutModal({
             <div className="space-y-5">
               {/* Payment Method Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">
-                  1. Pilih Rekening Tujuan Transfer
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {methods.map((method) => {
-                    const isSelected = selectedMethod.id === method.id;
-                    return (
-                      <button
-                        key={method.id}
-                        type="button"
-                        onClick={() => setSelectedMethod(method)}
-                        className={`p-3 rounded-xl border text-left transition-all ${
-                          isSelected
-                            ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/30"
-                            : "border-slate-200 bg-white hover:border-slate-300"
-                        }`}
-                      >
-                        <span className="text-[10px] uppercase font-bold text-blue-600 block mb-0.5">
-                          {method.badge}
-                        </span>
-                        <span className="text-xs font-bold text-slate-900 block line-clamp-1">
-                          {method.bankName}
-                        </span>
-                      </button>
-                    );
-                  })}
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    1. Pilih Rekening / Metode Tujuan
+                  </label>
+                  {methods.length === 1 && (
+                    <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                      Metode Resmi Admin Aktif
+                    </span>
+                  )}
                 </div>
+
+                {loadingConfig ? (
+                  <div className="flex items-center justify-center p-4 border rounded-xl border-slate-200 bg-slate-50 text-slate-400 text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin mr-2 text-blue-600" />
+                    Memuat rekening tujuan...
+                  </div>
+                ) : (
+                  <div
+                    className={`grid gap-2.5 ${
+                      methods.length === 1
+                        ? "grid-cols-1"
+                        : methods.length === 2
+                        ? "grid-cols-1 sm:grid-cols-2"
+                        : "grid-cols-1 sm:grid-cols-3"
+                    }`}
+                  >
+                    {methods.map((method) => {
+                      const isSelected = activeMethod.id === method.id;
+                      return (
+                        <button
+                          key={method.id}
+                          type="button"
+                          onClick={() => setSelectedMethod(method)}
+                          className={`p-3 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? "border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/30 shadow-sm"
+                              : "border-slate-200 bg-white hover:border-slate-300"
+                          }`}
+                        >
+                          <span className="text-[10px] uppercase font-bold text-blue-600 block mb-0.5">
+                            {method.badge || "Transfer"}
+                          </span>
+                          <span className="text-xs font-bold text-slate-900 block line-clamp-1">
+                            {method.bankName}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Bank Detail Card with Copy Button */}
-              <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 sm:p-5 shadow-lg">
+              <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4 sm:p-5 shadow-lg border border-slate-700/50">
                 <div className="flex items-center justify-between mb-3 text-xs text-slate-300">
-                  <span>Nomor Rekening / Tujuan</span>
-                  <span className="text-[11px] bg-slate-700/80 px-2 py-0.5 rounded-md font-mono">
-                    {selectedMethod.bankName}
+                  <span>
+                    {isQrisSelected ? "Nomor HP / Akun QRIS" : "Nomor Rekening / Tujuan"}
+                  </span>
+                  <span className="text-[11px] bg-slate-700/90 text-blue-200 px-2 py-0.5 rounded-md font-mono font-medium">
+                    {activeMethod.bankName}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xl sm:text-2xl font-black font-mono tracking-wider">
-                    {selectedMethod.accountNumber}
+                    {activeMethod.accountNumber}
                   </span>
                   <button
                     type="button"
-                    onClick={() => handleCopyAccount(selectedMethod.accountNumber)}
-                    className="inline-flex min-h-[36px] items-center gap-1 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+                    onClick={() => handleCopyAccount(activeMethod.accountNumber)}
+                    className="inline-flex min-h-[36px] items-center gap-1 bg-white/10 hover:bg-white/20 active:scale-95 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
                   >
                     {copiedAccount ? (
                       <>
@@ -344,7 +392,7 @@ export default function PackageCheckoutModal({
                 </div>
 
                 <div className="text-xs text-slate-300">
-                  Atas Nama: <strong className="text-white">{selectedMethod.accountHolder}</strong>
+                  Atas Nama: <strong className="text-white">{activeMethod.accountHolder}</strong>
                 </div>
 
                 <div className="mt-3 pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs">
@@ -355,24 +403,45 @@ export default function PackageCheckoutModal({
                 </div>
               </div>
 
-              {/* QRIS Admin Box (Jika tersedia) */}
-              {(adminContact as any).adminQrisImage && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-center space-y-2">
-                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                    Scan Barcode QRIS Resmi Admin
-                  </span>
-                  <div className="p-2 bg-white rounded-xl border border-slate-200 inline-block shadow-sm">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={(adminContact as any).adminQrisImage}
-                      alt="QRIS Admin"
-                      className="max-h-48 w-auto object-contain rounded"
-                    />
+              {/* QRIS Admin Box (Tampil jika QRIS dipilih atau jika QRIS image tersedia dari database) */}
+              {((adminContact as any)?.adminQrisImage || isQrisSelected) && (
+                (adminContact as any)?.adminQrisImage ? (
+                  <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-b from-blue-50/70 to-white p-4 sm:p-5 text-center space-y-3 shadow-sm">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white tracking-wide uppercase">
+                        QRIS SCAN CEPAT
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 block">
+                      Scan Barcode QRIS Resmi Admin
+                    </span>
+                    <div className="p-3 bg-white rounded-2xl border border-slate-200 inline-block shadow-md hover:shadow-lg transition-all">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={(adminContact as any).adminQrisImage}
+                        alt="QRIS Admin QuickLaunch"
+                        className="max-h-60 sm:max-h-72 w-auto object-contain mx-auto rounded-lg"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-medium text-slate-700">
+                        Mendukung semua aplikasi Bank & E-Wallet:
+                      </p>
+                      <p className="text-[10px] text-slate-500">
+                        BCA, Mandiri Livin, BRImo, BNI, GoPay, OVO, DANA, ShopeePay, LinkAja & SeaBank.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-slate-500">
-                    Bisa scan melalui BCA Mobile, Livin, GoPay, OVO, Dana, LinkAja, atau ShopeePay.
-                  </p>
-                </div>
+                ) : (
+                  <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 text-center space-y-1">
+                    <span className="text-xs font-bold text-blue-900 block">
+                      Transfer QRIS / E-Wallet Manual
+                    </span>
+                    <p className="text-[11px] text-slate-600">
+                      Silakan kirim pembayaran ke nomor tujuan <strong>{activeMethod.accountNumber}</strong> ({activeMethod.accountHolder}).
+                    </p>
+                  </div>
+                )
               )}
 
               {/* Upload Proof Form */}
