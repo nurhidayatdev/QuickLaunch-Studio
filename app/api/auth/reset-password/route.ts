@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       data: {
         passwordHash,
         resetToken: null,
+        resetCode: null,
         resetExpires: null,
       },
     });
@@ -70,3 +71,4 @@ export async function POST(req: Request) {
     );
   }
 }
+

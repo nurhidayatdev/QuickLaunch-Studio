@@ -20,12 +20,14 @@ import {
   Check,
   LogOut,
   Laptop,
+  Phone,
 } from "lucide-react";
 
 interface AccountUser {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   role?: string;
   package?: string;
   pageQuota?: number;
@@ -53,6 +55,7 @@ export default function AccountSettingsModal({
 
   // Profile Form State
   const [name, setName] = useState(currentUser?.name || "");
+  const [phone, setPhone] = useState(currentUser?.phone || "");
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileNotice, setProfileNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -74,7 +77,10 @@ export default function AccountSettingsModal({
     if (currentUser?.name) {
       setName(currentUser.name);
     }
-  }, [currentUser?.name]);
+    if (currentUser?.phone) {
+      setPhone(currentUser.phone);
+    }
+  }, [currentUser?.name, currentUser?.phone]);
 
   useEffect(() => {
     if (isOpen && initialTab) {
@@ -125,13 +131,13 @@ export default function AccountSettingsModal({
       const res = await fetch("/api/auth/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ name: name.trim(), phone: phone.trim() }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal memperbarui profil.");
 
-      setProfileNotice({ type: "success", text: "Nama profil Anda berhasil disimpan." });
+      setProfileNotice({ type: "success", text: "Profil & kontak verifikasi Anda berhasil disimpan." });
       if (onUserUpdated && data.user) {
         onUserUpdated(data.user);
       }
@@ -378,10 +384,34 @@ export default function AccountSettingsModal({
                   </p>
                 </div>
 
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Nomor WhatsApp Terverifikasi (Pemulihan Akun)
+                    </label>
+                    <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                      Keamanan Akun
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Phone className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Contoh: 081234567890"
+                      className="w-full min-h-[44px] pl-10 pr-3.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/15 focus:outline-none transition-all"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Digunakan untuk memvalidasi kepemilikan akun saat Anda melakukan reset kata sandi (lupa password).
+                  </p>
+                </div>
+
                 <div className="pt-2 flex justify-end">
                   <button
                     type="submit"
-                    disabled={savingProfile || name === currentUser.name}
+                    disabled={savingProfile || (name === currentUser.name && phone === ((currentUser as any).phone || ""))}
                     className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm cursor-pointer"
                   >
                     {savingProfile ? (
@@ -392,7 +422,7 @@ export default function AccountSettingsModal({
                     ) : (
                       <>
                         <Check className="h-4 w-4" />
-                        <span>Simpan Perubahan Nama</span>
+                        <span>Simpan Perubahan Profil</span>
                       </>
                     )}
                   </button>

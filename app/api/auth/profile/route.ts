@@ -12,7 +12,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { name } = body;
+    const { name, phone } = body;
 
     if (!name || typeof name !== "string" || name.trim().length < 2) {
       return NextResponse.json(
@@ -21,15 +21,19 @@ export async function PUT(req: Request) {
       );
     }
 
+    const cleanPhone = phone ? String(phone).replace(/[^0-9+]/g, "").trim() : undefined;
+
     const updated = await prisma.user.update({
       where: { id: user.id },
       data: {
         name: name.trim(),
+        ...(cleanPhone !== undefined ? { phone: cleanPhone } : {}),
       },
       select: {
         id: true,
         name: true,
         email: true,
+        phone: true,
         role: true,
         package: true,
         pageQuota: true,
@@ -49,3 +53,4 @@ export async function PUT(req: Request) {
     );
   }
 }
+

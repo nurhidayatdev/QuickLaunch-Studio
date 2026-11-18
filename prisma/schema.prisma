@@ -12,11 +12,13 @@ model User {
   id           String         @id @default(cuid())
   name         String
   email        String         @unique
+  phone        String?        // Nomor WhatsApp terdaftar untuk verifikasi akun & reset password
   passwordHash String
   role         String         @default("user") // user, admin
   package      String         @default("none") // none, single, pro, business
   pageQuota    Int            @default(0) // Kuota pembuatan landing page
-  resetToken   String?        // Token untuk reset / lupa password
+  resetToken   String?        // Token sesi reset terverifikasi
+  resetCode    String?        // 6-digit OTP verifikasi rahasia
   resetExpires DateTime?      // Waktu kadaluarsa token reset
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
