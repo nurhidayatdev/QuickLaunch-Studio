@@ -363,6 +363,60 @@ export default function AdminPaymentsClient({
     }
   };
 
+  const handleDeleteOrder = async (orderId: string, orderNumber: string) => {
+    const confirmed = await showConfirm(
+      `Apakah Anda yakin ingin menghapus pesanan #${orderNumber} secara permanen? Data pesanan ini akan dihapus dari histori.`,
+      "Hapus Pesanan / Request",
+      "Ya, Hapus Permanen",
+      "Batal"
+    );
+    if (!confirmed) return;
+
+    setProcessingId(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menghapus pesanan");
+
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      await showAlert(`Pesanan #${orderNumber} berhasil dihapus permanen.`, "success");
+      router.refresh();
+    } catch (e: any) {
+      await showAlert(e.message || "Terjadi kesalahan", "error");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string, userEmail: string) => {
+    const confirmed = await showConfirm(
+      `Apakah Anda yakin ingin menghapus akun pengguna "${userName}" (${userEmail}) secara permanen? Seluruh landing page dan riwayat pesanan milik pengguna ini akan ikut terhapus dari sistem. Tindakan ini tidak dapat dibatalkan.`,
+      "Hapus Pengguna Permanen",
+      "Ya, Hapus Akun",
+      "Batal"
+    );
+    if (!confirmed) return;
+
+    setProcessingId(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menghapus pengguna");
+
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      await showAlert(data.message || `Pengguna "${userName}" berhasil dihapus.`, "success");
+      router.refresh();
+    } catch (e: any) {
+      await showAlert(e.message || "Terjadi kesalahan", "error");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const handleCopyText = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedAccount(id);
@@ -671,10 +725,10 @@ export default function AdminPaymentsClient({
                       <button
                         type="button"
                         onClick={() => setPreviewImage(order.proofImageUrl)}
-                        className="inline-flex min-h-[38px] items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        className="inline-flex min-h-[38px] items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                       >
                         <Eye className="h-3.5 w-3.5" />
-                        Lihat Bukti
+                        <span>Lihat Bukti</span>
                       </button>
 
                       {isPending && (
@@ -686,27 +740,42 @@ export default function AdminPaymentsClient({
                               setRejectingOrder(order);
                               setRejectReason("");
                             }}
-                            className="inline-flex min-h-[38px] items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50"
+                            className="inline-flex min-h-[38px] items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50 cursor-pointer"
                           >
                             <XCircle className="h-3.5 w-3.5" />
-                            Tolak
+                            <span>Tolak</span>
                           </button>
 
                           <button
                             type="button"
                             disabled={processingId === order.id}
                             onClick={() => handleApprove(order)}
-                            className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50 shadow-sm"
+                            className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50 shadow-sm cursor-pointer"
                           >
                             {processingId === order.id ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             ) : (
                               <CheckCircle2 className="h-3.5 w-3.5" />
                             )}
-                            Setujui Pembayaran
+                            <span>Setujui</span>
                           </button>
                         </>
                       )}
+
+                      <button
+                        type="button"
+                        disabled={processingId === order.id}
+                        onClick={() => handleDeleteOrder(order.id, order.orderNumber)}
+                        className="inline-flex min-h-[38px] items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50/60 hover:bg-red-100 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors disabled:opacity-50 cursor-pointer"
+                        title="Hapus Pesanan / Request"
+                      >
+                        {processingId === order.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5" />
+                        )}
+                        <span>Hapus</span>
+                      </button>
                     </div>
                   </div>
                 );
@@ -779,19 +848,43 @@ export default function AdminPaymentsClient({
                         {u._count?.pages || 0} Halaman
                       </td>
                       <td className="px-4 py-3.5 text-right">
-                        {!isUserAdmin && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setQuotaModalUser(u);
-                              setQuotaAmount(1);
-                            }}
-                            className="inline-flex min-h-[34px] items-center gap-1 rounded-xl bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                            <span>Tambah Kuota</span>
-                          </button>
-                        )}
+                        <div className="inline-flex items-center gap-2 justify-end">
+                          {!isUserAdmin && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setQuotaModalUser(u);
+                                  setQuotaAmount(1);
+                                }}
+                                className="inline-flex min-h-[34px] items-center gap-1 rounded-xl bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                                <span>Tambah Kuota</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={processingId === u.id}
+                                onClick={() => handleDeleteUser(u.id, u.name, u.email)}
+                                className="inline-flex min-h-[34px] items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50/60 hover:bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-600 transition-colors disabled:opacity-50 cursor-pointer"
+                                title="Hapus Pengguna"
+                              >
+                                {processingId === u.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                                <span>Hapus</span>
+                              </button>
+                            </>
+                          )}
+                          {isUserAdmin && (
+                            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
+                              Akun Utama
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
