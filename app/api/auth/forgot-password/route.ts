@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     });
 
     // Kirim email OTP jika SMTP terkonfigurasi
-    await sendOtpEmail({
+    const emailResult = await sendOtpEmail({
       to: user.email,
       name: user.name,
       otpCode,
@@ -76,7 +76,6 @@ export async function POST(req: Request) {
 
     const adminWa = process.env.ADMIN_WHATSAPP || "087873520868";
 
-    // PENTING: Jangan pernah mengembalikan `otpCode` ke browser client!
     return NextResponse.json({
       success: true,
       message: "Kode verifikasi 6-digit telah dibuat secara aman.",
@@ -85,6 +84,8 @@ export async function POST(req: Request) {
       hasRegisteredPhone: Boolean(user.phone),
       maskedPhone,
       adminWa,
+      emailSent: !emailResult.simulated && emailResult.success,
+      isSimulated: Boolean(emailResult.simulated),
     });
   } catch (error: any) {
     console.error("Forgot password error:", error);

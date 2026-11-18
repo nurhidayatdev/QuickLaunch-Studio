@@ -21,6 +21,7 @@ import {
   X,
   RefreshCw,
   HelpCircle,
+  Info,
 } from "lucide-react";
 
 export default function ForgotPasswordPage() {
@@ -40,6 +41,7 @@ export default function ForgotPasswordPage() {
   const [hasRegisteredPhone, setHasRegisteredPhone] = useState(false);
   const [adminWa, setAdminWa] = useState("087873520868");
   const [otpCode, setOtpCode] = useState("");
+  const [isSimulated, setIsSimulated] = useState(false);
 
   // Step 3: Set New Password
   const [resetSessionToken, setResetSessionToken] = useState("");
@@ -82,6 +84,7 @@ export default function ForgotPasswordPage() {
       setMaskedPhone(data.maskedPhone);
       setHasRegisteredPhone(data.hasRegisteredPhone);
       if (data.adminWa) setAdminWa(data.adminWa);
+      if (data.isSimulated !== undefined) setIsSimulated(Boolean(data.isSimulated));
 
       setStep(2);
     } catch (err: any) {
@@ -337,6 +340,18 @@ export default function ForgotPasswordPage() {
                   <span className="text-emerald-600 font-bold">15 Menit</span>
                 </div>
               </div>
+
+              {isSimulated && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900 space-y-1.5 animate-in fade-in">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                    <Info className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span>Server Email (SMTP) Belum Dikonfigurasi</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-amber-800">
+                    Sistem belum terhubung ke server pengirim email. Anda dapat melihat kode OTP langsung di menu <strong>Konsol Admin</strong> (<span className="font-mono font-bold text-amber-950">/admin/payments &rarr; Reset Sandi</span>) atau konfirmasi via <strong>WhatsApp Admin</strong> di bawah.
+                  </p>
+                </div>
+              )}
 
               {/* Input OTP 6 Digit */}
               <div>
