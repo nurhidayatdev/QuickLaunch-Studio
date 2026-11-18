@@ -14,16 +14,29 @@ model User {
   email        String         @unique
   phone        String?        // Nomor WhatsApp terdaftar untuk verifikasi akun & reset password
   passwordHash String
-  role         String         @default("user") // user, admin
-  package      String         @default("none") // none, single, pro, business
-  pageQuota    Int            @default(0) // Kuota pembuatan landing page
-  resetToken   String?        // Token sesi reset terverifikasi
-  resetCode    String?        // 6-digit OTP verifikasi rahasia
-  resetExpires DateTime?      // Waktu kadaluarsa token reset
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  pages        Page[]
+  role          String         @default("user") // user, admin
+  package       String         @default("none") // none, single, pro, business
+  pageQuota     Int            @default(0) // Kuota pembuatan landing page
+  emailVerified Boolean        @default(true) // Status verifikasi email
+  resetToken    String?        // Token sesi reset terverifikasi
+  resetCode     String?        // 6-digit OTP verifikasi rahasia
+  resetExpires  DateTime?      // Waktu kadaluarsa token reset
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  pages         Page[]
   paymentOrders PaymentOrder[]
+}
+
+model PendingRegistration {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  phone        String?
+  passwordHash String
+  otpCode      String   // 6-digit OTP verifikasi pendaftaran
+  ticketId     String   // REG-XXXXXX
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
 }
 
 model PaymentOrder {

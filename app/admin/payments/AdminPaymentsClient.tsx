@@ -49,8 +49,10 @@ export default function AdminPaymentsClient({
   const [orders, setOrders] = useState<any[]>(initialOrders);
   const [users, setUsers] = useState<any[]>(initialUsers);
   const [pendingResets, setPendingResets] = useState<any[]>([]);
+  const [pendingRegistrations, setPendingRegistrations] = useState<any[]>([]);
   const [loadingResets, setLoadingResets] = useState(false);
   const [cancellingResetId, setCancellingResetId] = useState<string | null>(null);
+  const [cancellingRegId, setCancellingRegId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
   const [search, setSearch] = useState("");
   const [userSearch, setUserSearch] = useState("");
@@ -121,8 +123,11 @@ export default function AdminPaymentsClient({
       if (data.resets) {
         setPendingResets(data.resets);
       }
+      if (data.registrations) {
+        setPendingRegistrations(data.registrations);
+      }
     } catch (e) {
-      console.error("Error fetching resets:", e);
+      console.error("Error fetching resets & registrations:", e);
     } finally {
       setLoadingResets(false);
     }
@@ -131,6 +136,34 @@ export default function AdminPaymentsClient({
   useEffect(() => {
     fetchResets();
   }, []);
+
+  const handleCancelRegistration = async (registrationId: string, email: string) => {
+    const confirmed = await showConfirm(
+      `Apakah Anda yakin ingin membatalkan permohonan pendaftaran untuk "${email}"? Kode OTP yang sedang aktif akan langsung dihapus.`,
+      "Hapus Pendaftaran Tertunda",
+      "Ya, Hapus Pendaftaran",
+      "Batal"
+    );
+    if (!confirmed) return;
+
+    setCancellingRegId(registrationId);
+    try {
+      const res = await fetch("/api/admin/resets", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registrationId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal membatalkan permohonan");
+
+      setPendingRegistrations((prev) => prev.filter((r) => r.id !== registrationId));
+      await showAlert("Pendaftaran tertunda berhasil dibatalkan.", "success");
+    } catch (err: any) {
+      await showAlert(err.message || "Terjadi kesalahan", "error");
+    } finally {
+      setCancellingRegId(null);
+    }
+  };
 
   const handleCancelReset = async (userId: string, userName: string) => {
     const confirmed = await showConfirm(
@@ -414,10 +447,10 @@ export default function AdminPaymentsClient({
           }`}
         >
           <KeyRound className="h-4 w-4" />
-          <span>Reset Sandi</span>
-          {pendingResets.length > 0 && (
+          <span>Verifikasi & Reset</span>
+          {pendingResets.length + pendingRegistrations.length > 0 && (
             <span className="h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
-              {pendingResets.length}
+              {pendingResets.length + pendingRegistrations.length}
             </span>
           )}
         </button>
@@ -1027,7 +1060,7 @@ export default function AdminPaymentsClient({
         </div>
       )}
 
-      {/* TAB 4: VERIFIKASI RESET KATA SANDI */}
+      {/* TAB 4: VERIFIKASI AKUN & RESET KATA SANDI */}
       {activeTab === "resets" && (
         <div className="space-y-6">
           <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
@@ -1037,10 +1070,10 @@ export default function AdminPaymentsClient({
               </div>
               <div>
                 <h3 className="text-xs sm:text-sm font-bold text-slate-900">
-                  Pusat Verifikasi Pemulihan Kata Sandi
+                  Pusat Verifikasi Akun Baru & Pemulihan Sandi
                 </h3>
                 <p className="text-[11px] text-slate-600">
-                  Pantau permohonan lupa password yang aktif. Hanya pemilik asli yang berhak menerima kode OTP 6-digit.
+                  Pantau pendaftaran baru dan permohonan reset sandi aktif. Kode OTP rahasia dapat dikonfirmasi langsung via WhatsApp atau disalin.
                 </p>
               </div>
             </div>
@@ -1057,118 +1090,252 @@ export default function AdminPaymentsClient({
           {loadingResets ? (
             <div className="p-8 text-center bg-white border border-slate-200 rounded-3xl">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600 mx-auto mb-2" />
-              <p className="text-xs text-slate-500 font-medium">Memeriksa permohonan reset sandi aktif...</p>
+              <p className="text-xs text-slate-500 font-medium">Memeriksa permohonan verifikasi aktif...</p>
             </div>
-          ) : pendingResets.length === 0 ? (
+          ) : pendingResets.length === 0 && pendingRegistrations.length === 0 ? (
             <div className="p-12 text-center bg-white border border-slate-200 rounded-3xl space-y-2">
               <div className="h-12 w-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <h4 className="text-sm font-bold text-slate-900">
-                Tidak Ada Permohonan Reset Sandi yang Menggantung
+                Semua Verifikasi Bersih & Aman
               </h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Semua akun berada dalam kondisi aman. Permintaan reset password hanya akan muncul di sini saat pengguna mengajukan pemulihan akun.
+                Tidak ada pendaftaran tertunda atau permintaan reset kata sandi yang menggantung saat ini.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pendingResets.map((r) => {
-                const expiresAt = new Date(r.resetExpires);
-                const isExpired = new Date() > expiresAt;
-                const formattedExpiry = expiresAt.toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
-                const waNumber = r.phone || "";
-                const cleanPhone = waNumber.replace(/[^0-9]/g, "").replace(/^0/, "62");
-                const waUrl = cleanPhone
-                  ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-                      `Halo ${r.name}, ini Admin Resmi QuickLaunch. Berikut kode OTP verifikasi 6-digit untuk reset kata sandi akun Anda: *${r.resetCode}*. Jangan berikan kode ini kepada orang lain.`
-                    )}`
-                  : null;
-
-                return (
-                  <div
-                    key={r.id}
-                    className="p-5 rounded-3xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between gap-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <span className="text-sm font-bold text-slate-900 block">{r.name}</span>
-                          <span className="text-xs text-slate-500 font-mono block">{r.email}</span>
-                        </div>
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                            isExpired
-                              ? "bg-slate-100 text-slate-500"
-                              : "bg-red-50 text-red-700 border border-red-200"
-                          }`}
-                        >
-                          {isExpired ? "Kadaluarsa" : `Aktif s.d ${formattedExpiry}`}
-                        </span>
-                      </div>
-
-                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1.5 text-xs">
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-500">Nomor WhatsApp:</span>
-                          <span className="font-mono font-bold text-slate-800">
-                            {r.phone || "Belum ditautkan di profil"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
-                          <span className="text-slate-500 font-medium">Kode OTP Rahasia:</span>
-                          <span className="font-mono text-base font-black text-blue-700 tracking-wider bg-white px-2.5 py-0.5 rounded-lg border border-blue-200">
-                            {r.resetCode}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                      {waUrl ? (
-                        <a
-                          href={waUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-xs"
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                          <span>Kirim OTP ke WA Pemilik</span>
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(r.resetCode);
-                            showAlert("Kode OTP berhasil disalin ke clipboard.", "success");
-                          }}
-                          className="flex-1 inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors"
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                          <span>Salin Kode OTP</span>
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        disabled={cancellingResetId === r.id}
-                        onClick={() => handleCancelReset(r.id, r.name)}
-                        className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50/70 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors cursor-pointer"
-                        title="Tolak & Hanguskan OTP"
-                      >
-                        {cancellingResetId === r.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-3.5 w-3.5" />
-                        )}
-                        <span>Tolak</span>
-                      </button>
+            <div className="space-y-6">
+              {/* SECTION 1: VERIFIKASI PENDAFTARAN AKUN BARU */}
+              {pendingRegistrations.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-amber-500" />
+                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                        Pendaftaran Akun Baru Menunggu Verifikasi ({pendingRegistrations.length})
+                      </h4>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pendingRegistrations.map((reg) => {
+                      const expiresAt = new Date(reg.expiresAt);
+                      const isExpired = new Date() > expiresAt;
+                      const formattedExpiry = expiresAt.toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+                      const cleanPhone = (reg.phone || "")
+                        .replace(/[^0-9]/g, "")
+                        .replace(/^0/, "62");
+                      const waUrl = cleanPhone
+                        ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+                            `Halo ${reg.name}, ini Admin Resmi QuickLaunch. Berikut kode OTP 6-digit untuk verifikasi aktivasi akun pendaftaran Anda: *${reg.otpCode}* (No Tiket: ${reg.ticketId}).`
+                          )}`
+                        : null;
+
+                      return (
+                        <div
+                          key={reg.id}
+                          className="p-5 rounded-3xl border border-amber-200/80 bg-white shadow-sm flex flex-col justify-between gap-4"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <span className="text-sm font-bold text-slate-900 block">{reg.name}</span>
+                                <span className="text-xs text-slate-500 font-mono block">{reg.email}</span>
+                              </div>
+                              <span
+                                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                                  isExpired
+                                    ? "bg-slate-100 text-slate-500"
+                                    : "bg-amber-50 text-amber-800 border border-amber-200"
+                                }`}
+                              >
+                                {isExpired ? "Kadaluarsa" : `Aktif s.d ${formattedExpiry}`}
+                              </span>
+                            </div>
+
+                            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1.5 text-xs">
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-500">No. Tiket:</span>
+                                <span className="font-mono font-bold text-slate-900">{reg.ticketId}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-500">Nomor WhatsApp:</span>
+                                <span className="font-mono font-bold text-slate-800">
+                                  {reg.phone || "Tidak diisi"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
+                                <span className="text-slate-500 font-medium">Kode OTP Aktivasi:</span>
+                                <span className="font-mono text-base font-black text-amber-700 tracking-wider bg-white px-2.5 py-0.5 rounded-lg border border-amber-200">
+                                  {reg.otpCode}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                            {waUrl ? (
+                              <a
+                                href={waUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                                <span>Kirim OTP via WA</span>
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(reg.otpCode);
+                                  showAlert("Kode OTP aktivasi disalin ke clipboard.", "success");
+                                }}
+                                className="flex-1 inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                                <span>Salin Kode OTP</span>
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              disabled={cancellingRegId === reg.id}
+                              onClick={() => handleCancelRegistration(reg.id, reg.email)}
+                              className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50/70 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors cursor-pointer"
+                              title="Batalkan Pendaftaran"
+                            >
+                              {cancellingRegId === reg.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                              <span>Batal</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 2: PERMINTAAN RESET KATA SANDI */}
+              {pendingResets.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-blue-600" />
+                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                        Permintaan Reset Sandi Akun ({pendingResets.length})
+                      </h4>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pendingResets.map((r) => {
+                      const expiresAt = new Date(r.resetExpires);
+                      const isExpired = new Date() > expiresAt;
+                      const formattedExpiry = expiresAt.toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+                      const waNumber = r.phone || "";
+                      const cleanPhone = waNumber.replace(/[^0-9]/g, "").replace(/^0/, "62");
+                      const waUrl = cleanPhone
+                        ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+                            `Halo ${r.name}, ini Admin Resmi QuickLaunch. Berikut kode OTP verifikasi 6-digit untuk reset kata sandi akun Anda: *${r.resetCode}*. Jangan berikan kode ini kepada orang lain.`
+                          )}`
+                        : null;
+
+                      return (
+                        <div
+                          key={r.id}
+                          className="p-5 rounded-3xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between gap-4"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <span className="text-sm font-bold text-slate-900 block">{r.name}</span>
+                                <span className="text-xs text-slate-500 font-mono block">{r.email}</span>
+                              </div>
+                              <span
+                                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                                  isExpired
+                                    ? "bg-slate-100 text-slate-500"
+                                    : "bg-red-50 text-red-700 border border-red-200"
+                                }`}
+                              >
+                                {isExpired ? "Kadaluarsa" : `Aktif s.d ${formattedExpiry}`}
+                              </span>
+                            </div>
+
+                            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1.5 text-xs">
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-500">Nomor WhatsApp:</span>
+                                <span className="font-mono font-bold text-slate-800">
+                                  {r.phone || "Belum ditautkan di profil"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
+                                <span className="text-slate-500 font-medium">Kode OTP Rahasia:</span>
+                                <span className="font-mono text-base font-black text-blue-700 tracking-wider bg-white px-2.5 py-0.5 rounded-lg border border-blue-200">
+                                  {r.resetCode}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                            {waUrl ? (
+                              <a
+                                href={waUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                                <span>Kirim OTP ke WA Pemilik</span>
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(r.resetCode);
+                                  showAlert("Kode OTP berhasil disalin ke clipboard.", "success");
+                                }}
+                                className="flex-1 inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                                <span>Salin Kode OTP</span>
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              disabled={cancellingResetId === r.id}
+                              onClick={() => handleCancelReset(r.id, r.name)}
+                              className="inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50/70 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors cursor-pointer"
+                              title="Tolak & Hanguskan OTP"
+                            >
+                              {cancellingResetId === r.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                              <span>Tolak</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

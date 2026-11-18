@@ -11,6 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: "Akses khusus admin." }, { status: 403 });
     }
 
+    // Ambil permintaan reset kata sandi aktif
     const pendingResets = await prisma.user.findMany({
       where: {
         resetCode: { not: null },
@@ -30,13 +31,34 @@ export async function GET() {
       },
     });
 
+    // Ambil verifikasi pendaftaran akun baru yang sedang pending
+    const pendingRegistrations = await prisma.pendingRegistration.findMany({
+      where: {
+        expiresAt: { gt: new Date() },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        otpCode: true,
+        ticketId: true,
+        expiresAt: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
     return NextResponse.json({
       resets: pendingResets,
+      registrations: pendingRegistrations,
     });
   } catch (error: any) {
     console.error("Fetch pending resets error:", error);
     return NextResponse.json(
-      { error: "Gagal memuat permintaan reset password." },
+      { error: "Gagal memuat permohonan verifikasi." },
       { status: 500 }
     );
   }
@@ -49,27 +71,36 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Akses khusus admin." }, { status: 403 });
     }
 
-    const { userId } = await req.json();
-    if (!userId) {
-      return NextResponse.json({ error: "User ID diperlukan." }, { status: 400 });
+    const { userId, registrationId } = await req.json();
+
+    if (registrationId) {
+      await prisma.pendingRegistration.delete({
+        where: { id: registrationId },
+      }).catch(() => {});
+      return NextResponse.json({
+        message: "Data pendaftaran tertunda berhasil dibatalkan.",
+      });
     }
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        resetCode: null,
-        resetToken: null,
-        resetExpires: null,
-      },
-    });
+    if (userId) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          resetCode: null,
+          resetToken: null,
+          resetExpires: null,
+        },
+      });
+      return NextResponse.json({
+        message: "Permintaan reset password berhasil dibatalkan / ditolak.",
+      });
+    }
 
-    return NextResponse.json({
-      message: "Permintaan reset password berhasil dibatalkan / ditolak.",
-    });
+    return NextResponse.json({ error: "Parameter tidak lengkap." }, { status: 400 });
   } catch (error: any) {
-    console.error("Cancel reset error:", error);
+    console.error("Cancel reset/reg error:", error);
     return NextResponse.json(
-      { error: "Gagal membatalkan permintaan reset." },
+      { error: "Gagal membatalkan permohonan." },
       { status: 500 }
     );
   }

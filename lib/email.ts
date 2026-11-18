@@ -5,6 +5,7 @@ interface SendOtpOptions {
   name: string;
   otpCode: string;
   expiresInMinutes?: number;
+  purpose?: "reset_password" | "register";
 }
 
 export async function sendOtpEmail({
@@ -12,6 +13,7 @@ export async function sendOtpEmail({
   name,
   otpCode,
   expiresInMinutes = 15,
+  purpose = "reset_password",
 }: SendOtpOptions): Promise<{ success: boolean; simulated?: boolean; error?: string }> {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
@@ -21,12 +23,22 @@ export async function sendOtpEmail({
 
   // Jika kredensial SMTP belum dipasang di environment
   if (!host || !user || !pass) {
-    console.log(`[Email Service (Simulasi)]: Kode OTP untuk ${to} (${name}) adalah ${otpCode}`);
+    console.log(`[Email Service (Simulasi - ${purpose})]: Kode OTP untuk ${to} (${name}) adalah ${otpCode}`);
     return {
       success: true,
       simulated: true,
     };
   }
+
+  const isRegister = purpose === "register";
+  const title = isRegister ? "Verifikasi Pendaftaran Akun" : "Verifikasi Reset Kata Sandi";
+  const subtitle = isRegister ? "Aktivasi Akun Baru QuickLaunch" : "Verifikasi Permintaan Reset Kata Sandi";
+  const introText = isRegister
+    ? "Terima kasih telah bergabung dengan <strong>QuickLaunch Studio</strong>! Gunakan kode verifikasi 6-digit rahasia berikut untuk mengaktifkan dan mengonfirmasi alamat email akun Anda:"
+    : "Kami menerima permintaan untuk mereset kata sandi akun QuickLaunch Anda. Gunakan kode verifikasi rahasia 6-digit berikut untuk memvalidasi identitas Anda:";
+  const subject = isRegister
+    ? `[QuickLaunch] Kode Verifikasi Pendaftaran Akun: ${otpCode}`
+    : `[QuickLaunch] Kode Verifikasi Reset Kata Sandi Anda: ${otpCode}`;
 
   try {
     const transporter = nodemailer.createTransport({
@@ -58,18 +70,18 @@ export async function sendOtpEmail({
         <div class="container">
           <div class="header">
             <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">QuickLaunch Security</h1>
-            <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Verifikasi Permintaan Reset Kata Sandi</p>
+            <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">${subtitle}</p>
           </div>
           <div class="content">
             <p style="margin-top: 0;">Halo <strong>${name}</strong>,</p>
-            <p>Kami menerima permintaan untuk mereset kata sandi akun QuickLaunch Anda. Gunakan kode verifikasi rahasia 6-digit berikut untuk memvalidasi identitas Anda:</p>
+            <p>${introText}</p>
             
             <div class="otp-box">
               <span class="otp-code">${otpCode}</span>
             </div>
 
             <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">
-              ⚠️ <strong>PENTING:</strong> Kode ini hanya berlaku selama <strong>${expiresInMinutes} menit</strong> dan bersifat rahasia. Jangan pernah memberikan kode ini kepada siapa pun. Jika Anda tidak merasa mengajukan permohonan ini, segera abaikan email ini dan akun Anda tetap aman.
+              ⚠️ <strong>PENTING:</strong> Kode ini hanya berlaku selama <strong>${expiresInMinutes} menit</strong> dan bersifat rahasia. Jangan pernah memberikan kode ini kepada siapa pun. Jika Anda tidak merasa melakukan tindakan ini, abaikan email ini.
             </p>
           </div>
           <div class="footer">
@@ -83,7 +95,7 @@ export async function sendOtpEmail({
     await transporter.sendMail({
       from,
       to,
-      subject: `[QuickLaunch] Kode Verifikasi Reset Kata Sandi Anda: ${otpCode}`,
+      subject,
       html: htmlContent,
     });
 
