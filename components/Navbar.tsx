@@ -58,10 +58,10 @@ export default function Navbar({ user }: NavbarProps) {
     try {
       setIsDropdownOpen(false);
       await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-      router.refresh();
+      window.location.href = "/";
     } catch (e) {
       console.error(e);
+      window.location.href = "/";
     }
   };
 

@@ -194,10 +194,10 @@ export default function AccountSettingsModal({
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       onClose();
-      router.push("/login");
-      router.refresh();
+      window.location.href = "/";
     } catch (e) {
       console.error(e);
+      window.location.href = "/";
     }
   };
 
