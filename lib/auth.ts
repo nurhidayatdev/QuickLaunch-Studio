@@ -54,7 +54,7 @@ export async function getCurrentUser() {
   });
 
   if (user) {
-    const adminEmail = (process.env.ADMIN_EMAIL || "demo@quicklaunch.id").toLowerCase();
+    const adminEmail = (process.env.ADMIN_EMAIL || "nurhidayat120706@gmail.com").toLowerCase();
     if (user.email.toLowerCase() === adminEmail) {
       user.role = "admin";
     }

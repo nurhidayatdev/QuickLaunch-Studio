@@ -93,8 +93,8 @@ export const PAYMENT_METHODS: BankAccount[] = [
 ];
 
 export const ADMIN_CONTACT = {
-  waNumber: process.env.ADMIN_WHATSAPP || "081234567890",
-  adminEmail: process.env.ADMIN_EMAIL || "demo@quicklaunch.id",
+  waNumber: process.env.ADMIN_WHATSAPP || "087873520868",
+  adminEmail: process.env.ADMIN_EMAIL || "nurhidayat120706@gmail.com",
 };
 
 export async function getDynamicPaymentConfig() {

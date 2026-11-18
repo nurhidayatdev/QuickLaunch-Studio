@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     if (existing) {
       user = existing;
     } else {
-      const isAdminEmail = cleanEmail === (process.env.ADMIN_EMAIL || "demo@quicklaunch.id").toLowerCase();
+      const isAdminEmail = cleanEmail === (process.env.ADMIN_EMAIL || "nurhidayat120706@gmail.com").toLowerCase();
       user = await prisma.user.create({
         data: {
           name: pending.name,
