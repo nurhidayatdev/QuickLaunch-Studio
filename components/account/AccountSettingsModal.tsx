@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   X,
@@ -36,6 +37,7 @@ interface Props {
   onClose: () => void;
   currentUser: AccountUser;
   onUserUpdated?: (updated: AccountUser) => void;
+  initialTab?: "profile" | "password" | "security";
 }
 
 export default function AccountSettingsModal({
@@ -43,9 +45,11 @@ export default function AccountSettingsModal({
   onClose,
   currentUser,
   onUserUpdated,
+  initialTab = "profile",
 }: Props) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"profile" | "password" | "security">("profile");
+  const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<"profile" | "password" | "security">(initialTab);
 
   // Profile Form State
   const [name, setName] = useState(currentUser?.name || "");
@@ -62,7 +66,39 @@ export default function AccountSettingsModal({
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordNotice, setPasswordNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (currentUser?.name) {
+      setName(currentUser.name);
+    }
+  }, [currentUser?.name]);
+
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted) return null;
 
   // Password Strength Calculation
   const hasMinLength = newPassword.length >= 8;
@@ -177,11 +213,16 @@ export default function AccountSettingsModal({
       })
     : "Baru saja";
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[90vh] animate-in fade-in zoom-in-95 duration-150">
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 via-white to-slate-50">
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 via-white to-slate-50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20">
               <ShieldCheck className="h-5 w-5" />
@@ -197,14 +238,15 @@ export default function AccountSettingsModal({
           </div>
           <button
             onClick={onClose}
-            className="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+            className="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            title="Tutup (Esc)"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-slate-200 bg-slate-50/50 px-6 gap-2 text-xs font-bold">
+        <div className="flex border-b border-slate-200 bg-slate-50/50 px-6 gap-2 text-xs font-bold shrink-0">
           <button
             onClick={() => setActiveTab("profile")}
             className={`py-3 px-3 border-b-2 flex items-center gap-2 transition-all cursor-pointer ${
@@ -625,6 +667,8 @@ export default function AccountSettingsModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
+
